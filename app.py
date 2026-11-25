@@ -6,6 +6,7 @@ import streamlit as st
 from tensorflow.keras.models import load_model
 
 st.title("Credit Scoring - ANN")
+st.info("Bonjour, nous sommes Noureddine Isfaoui et Maryem Lahmami, étudiants en Master Data Science et Actuariat à la Faculté d'Économie et de Gestion de Settat (FEG Settat). Nous avons le plaisir de vous présenter notre application dédiée à l'analyse du score de crédit (Credit Scoring), développée dans le cadre de notre projet. N'hésitez pas à la tester et à nous partager vos retours !")
 
 model = load_model("ann_model.keras")
 preprocessor = joblib.load("preprocessor.pkl")
