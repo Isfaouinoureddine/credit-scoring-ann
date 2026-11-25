@@ -8,7 +8,7 @@ from tensorflow.keras.models import load_model
 st.title("Credit Scoring - ANN")
 
 model = load_model("ann_model.keras")
-preprocessor = joblib.load("preprocessor (1).pkl")
+preprocessor = joblib.load("preprocessor.pkl")
 with open("threshold.json", encoding="utf-8") as f:
   threshold = float(json.load(f)["threshold"])
 
