@@ -15,10 +15,10 @@ with open("threshold.json") as f:
 uploaded_file = st.file_uploader("ارفع ملف CSV للتجربة", type=["csv"])
 if uploaded_file is not None:
  try:
-df = pd.read_csv(uploaded_file)
+     df = pd.read_csv(uploaded_file)
 except UnicodeDecodeError:
-uploaded_file.seek(0)
-df = pd.read_csv(uploaded_file, encoding="latin-1")
+     uploaded_file.seek(0)
+     df = pd.read_csv(uploaded_file, encoding="latin-1")
     X_proc = preprocessor.transform(df)
     probs = model.predict(X_proc, verbose=0).reshape(-1)
     preds = (probs >= threshold).astype(int)
