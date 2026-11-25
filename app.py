@@ -6,7 +6,20 @@ import streamlit as st
 from tensorflow.keras.models import load_model
 
 st.title("Credit Scoring - ANN")
-st.info("Bonjour, nous sommes Noureddine Isfaoui et Maryem Lahmami, étudiants en Master Data Science et Actuariat à la Faculté d'Économie et de Gestion de Settat (FEG Settat). Nous avons le plaisir de vous présenter notre application dédiée à l'analyse du score de crédit (Credit Scoring), développée dans le cadre de notre projet. N'hésitez pas à la tester et à nous partager vos retours !")
+st.markdown(
+    """
+    <div style="padding: 14px 18px; border-radius: 10px; background: linear-gradient(135deg, #0f2942 0%, #163a5f 100%); border-right: 4px solid #38bdf8; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);">
+        <p style="font-size: 16px; font-weight: 500; line-height: 1.7; margin: 0 0 8px 0; color: #f8fafc; text-align: right;" dir="rtl">
+            مرحباً، نحن نورالدين اسفاوي و مريم لحمامي، طلبة ماستر علوم البيانات والاكتواريا (FEG Settat).
+        </p>
+        <p style="font-size: 14.5px; line-height: 1.6; margin: 0; color: #cbd5e1; text-align: left;" dir="ltr">
+            Bonjour, nous sommes étudiants en Master Data Science et Actuariat à la FEG Settat. Nous présentons notre application dédiée à l'analyse du score de crédit (Credit Scoring).
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 model = load_model("ann_model.keras")
 preprocessor = joblib.load("preprocessor.pkl")
