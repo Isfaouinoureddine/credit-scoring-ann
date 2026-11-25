@@ -1,0 +1,8 @@
+{
+    "model": "Artificial Neural Network",
+    "framework": "TensorFlow Keras",
+    "input_features": 225,
+    "threshold": 0.6454050540924072,
+    "roc_auc": 0.7489489214127105,
+    "pr_auc": 0.22455857983306385
+}
