@@ -356,27 +356,53 @@ def load_artifacts():
 
 
 def _norm_key(text: object) -> str:
-    return re.sub(r"[^a-z0-9\u0600-\u06ff]+", "", str(text).strip().lower())
+    try:
+        if text is None:
+            return ""
+        if isinstance(text, (list, tuple, dict, set)):
+            text = "_".join(str(x) for x in text)
+        return re.sub(r"[^a-z0-9\u0600-\u06ff]+", "", str(text).strip().lower())
+    except Exception:
+        return ""
+
+
+def _safe_expected_cols(preprocessor):
+    try:
+        raw_cols = getattr(preprocessor, "feature_names_in_", None)
+        if raw_cols is None:
+            return None
+        cols = []
+        for c in raw_cols:
+            if c is not None and not isinstance(c, (dict, set)):
+                cols.append(c)
+        return cols if cols else None
+    except Exception:
+        return None
 
 
 def _promote_header_if_needed(df: pd.DataFrame, expected_cols=None) -> pd.DataFrame:
-    if df is None or df.empty:
-        return df
-    exp_norm = {_norm_key(c) for c in (expected_cols or []) if _norm_key(c)}
-    first_row_vals = [str(v).strip() for v in df.iloc[0].tolist() if pd.notna(v) and str(v).strip()]
-    first_norm = {_norm_key(v) for v in first_row_vals}
+    try:
+        if df is None or df.empty or len(df) <= 1:
+            return df
+        exp_norm = {_norm_key(c) for c in (expected_cols or []) if _norm_key(c)}
+        first_row = df.iloc[0].tolist()
+        first_row_vals = [str(v).strip() for v in first_row if pd.notna(v) and str(v).strip()]
+        first_norm = {_norm_key(v) for v in first_row_vals if _norm_key(v)}
 
-    unnamed_ratio = sum(1 for c in df.columns if str(c).strip().lower().startswith("unnamed:")) / max(1, len(df.columns))
-    overlap_match = len(exp_norm.intersection(first_norm)) >= 1 if exp_norm else False
+        col_names = [str(c).strip() for c in df.columns]
+        unnamed_ratio = sum(1 for c in col_names if c.lower().startswith("unnamed:")) / max(1, len(col_names))
+        overlap_match = bool(exp_norm and first_norm and (exp_norm & first_norm))
 
-    if (unnamed_ratio >= 0.5 or overlap_match) and len(df) > 1:
-        new_cols = [
-            str(v).strip() if (pd.notna(v) and str(v).strip()) else f"col_{idx}"
-            for idx, v in enumerate(df.iloc[0].tolist())
-        ]
-        df = df.iloc[1:].copy()
-        df.columns = new_cols
-        df = df.reset_index(drop=True)
+        if unnamed_ratio >= 0.5 or overlap_match:
+            new_cols = [
+                str(v).strip() if (pd.notna(v) and str(v).strip()) else f"col_{idx}"
+                for idx, v in enumerate(first_row)
+            ]
+            promoted = df.iloc[1:].copy()
+            promoted.columns = new_cols
+            return promoted.reset_index(drop=True)
+    except Exception:
+        pass
     return df
 
 
@@ -396,7 +422,7 @@ def read_delimited_smart(raw_bytes: bytes) -> pd.DataFrame:
                 sep = max(counts, key=counts.get) if max(counts.values()) > 0 else ","
 
             df = pd.read_csv(io.StringIO(text), sep=sep, engine="python", on_bad_lines="skip")
-            if not df.empty:
+            if df is not None and not df.empty:
                 return df
         except Exception:
             continue
@@ -437,7 +463,7 @@ def read_pdf_tables(raw_bytes: bytes) -> pd.DataFrame:
 
 def load_any_tabular_file(file_obj) -> pd.DataFrame:
     raw_bytes = file_obj.getvalue()
-    name = file_obj.name.lower()
+    name = (file_obj.name or "").lower()
 
     if name.endswith((".xlsx", ".xls", ".xlsm", ".xlsb", ".ods")):
         loaders = [read_excel_smart, read_delimited_smart]
@@ -469,41 +495,48 @@ def load_any_tabular_file(file_obj) -> pd.DataFrame:
 
 
 def align_dataframe_to_preprocessor(df_raw: pd.DataFrame, preprocessor):
-    expected_cols = getattr(preprocessor, "feature_names_in_", None)
-    df = _promote_header_if_needed(df_raw.copy(), expected_cols=expected_cols)
-    df.columns = [str(c).strip() for c in df.columns]
-    df = df.loc[:, ~df.columns.duplicated()]
+    try:
+        expected_cols = _safe_expected_cols(preprocessor)
+        df = _promote_header_if_needed(df_raw.copy(), expected_cols=expected_cols)
+        df.columns = [str(c).strip() for c in df.columns]
+        df = df.loc[:, ~df.columns.duplicated()]
 
-    for col in df.select_dtypes(include=["object", "string"]).columns:
-        cleaned = df[col].astype(str).str.strip().str.replace(" ", "", regex=False).str.replace(",", ".", regex=False)
-        numeric_try = pd.to_numeric(cleaned, errors="coerce")
-        if len(df) > 0 and numeric_try.notna().sum() >= max(1, int(0.7 * len(df))):
-            df[col] = numeric_try
+        for col in df.select_dtypes(include=["object", "string"]).columns:
+            try:
+                cleaned = df[col].astype(str).str.strip().str.replace(" ", "", regex=False).str.replace(",", ".", regex=False)
+                numeric_try = pd.to_numeric(cleaned, errors="coerce")
+                if len(df) > 0 and numeric_try.notna().sum() >= max(1, int(0.7 * len(df))):
+                    df[col] = numeric_try
+            except Exception:
+                continue
 
-    if expected_cols is None:
-        return df, [], []
+        if not expected_cols:
+            return df, [], list(df.columns)
 
-    expected_list = list(expected_cols)
-    exact_map = {str(c).strip(): c for c in df.columns}
-    norm_map = {_norm_key(c): c for c in df.columns if _norm_key(c)}
+        exact_map = {str(c).strip(): c for c in df.columns}
+        norm_map = {_norm_key(c): c for c in df.columns if _norm_key(c)}
 
-    aligned = pd.DataFrame(index=df.index)
-    missing_cols = []
-    matched_cols = []
-    for exp in expected_list:
-        exp_str = str(exp).strip()
-        exp_norm = _norm_key(exp_str)
-        if exp_str in exact_map:
-            aligned[exp] = df[exact_map[exp_str]]
-            matched_cols.append(exp)
-        elif exp_norm and exp_norm in norm_map:
-            aligned[exp] = df[norm_map[exp_norm]]
-            matched_cols.append(exp)
-        else:
-            aligned[exp] = np.nan
-            missing_cols.append(exp)
+        aligned = pd.DataFrame(index=df.index)
+        missing_cols = []
+        matched_cols = []
+        for exp in expected_cols:
+            exp_str = str(exp).strip()
+            exp_norm = _norm_key(exp_str)
+            if exp_str in exact_map:
+                aligned[exp] = df[exact_map[exp_str]]
+                matched_cols.append(exp_str)
+            elif exp_norm and exp_norm in norm_map:
+                aligned[exp] = df[norm_map[exp_norm]]
+                matched_cols.append(exp_str)
+            else:
+                aligned[exp] = np.nan
+                missing_cols.append(exp_str)
 
-    return aligned, missing_cols, matched_cols
+        return aligned, missing_cols, matched_cols
+    except Exception:
+        fallback_df = df_raw.copy()
+        fallback_df.columns = [str(c).strip() for c in fallback_df.columns]
+        return fallback_df, [], list(fallback_df.columns)
 
 
 def safe_predict_probabilities(model, preprocessor, df_model_input: pd.DataFrame) -> np.ndarray:
