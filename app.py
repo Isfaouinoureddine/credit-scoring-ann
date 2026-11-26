@@ -15,7 +15,7 @@ st.set_page_config(
 )
 
 LIGHT_THEME_CSS = """<style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
 .stApp {
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
@@ -23,217 +23,163 @@ LIGHT_THEME_CSS = """<style>
   font-family: "Plus Jakarta Sans", "Cairo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-@keyframes ledPulse {
-  0%, 100% { opacity: 1; transform: scale(1.12); }
-  50% { opacity: 0.35; transform: scale(0.88); }
-}
-
 @keyframes seqAr {
-  0%, 22% { opacity: 1; }
-  25%, 100% { opacity: 0; }
+  0%, 22% { opacity: 1; transform: translateY(0); }
+  25%, 100% { opacity: 0; transform: translateY(4px); }
 }
 @keyframes seqFr {
-  0%, 24% { opacity: 0; }
-  27%, 47% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+  0%, 24% { opacity: 0; transform: translateY(4px); }
+  27%, 47% { opacity: 1; transform: translateY(0); }
+  50%, 100% { opacity: 0; transform: translateY(4px); }
 }
 @keyframes seqEn {
-  0%, 49% { opacity: 0; }
-  52%, 72% { opacity: 1; }
-  75%, 100% { opacity: 0; }
+  0%, 49% { opacity: 0; transform: translateY(4px); }
+  52%, 72% { opacity: 1; transform: translateY(0); }
+  75%, 100% { opacity: 0; transform: translateY(4px); }
 }
 @keyframes seqAmz {
-  0%, 74% { opacity: 0; }
-  77%, 97% { opacity: 1; }
-  100% { opacity: 0; }
+  0%, 74% { opacity: 0; transform: translateY(4px); }
+  77%, 97% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(4px); }
 }
 
-@keyframes revealNameOne {
-  0% { max-width: 0; border-right-color: #0284c7; }
-  36% { max-width: 100%; border-right-color: #0284c7; }
-  43%, 100% { max-width: 100%; border-right-color: transparent; }
+@keyframes typeLine1 {
+  0% { max-width: 0; border-right-color: #0369a1; }
+  28% { max-width: 100%; border-right-color: #0369a1; }
+  33%, 100% { max-width: 100%; border-right-color: transparent; }
 }
 
-@keyframes revealNameTwo {
-  0%, 38% { max-width: 0; opacity: 0; border-right-color: #0d9488; }
-  39% { max-width: 0; opacity: 1; border-right-color: #0d9488; }
-  76% { max-width: 100%; opacity: 1; border-right-color: #0d9488; }
-  84%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
+@keyframes typeLine2 {
+  0%, 30% { max-width: 0; opacity: 0; border-right-color: #0369a1; }
+  31% { max-width: 0; opacity: 1; border-right-color: #0369a1; }
+  62% { max-width: 100%; opacity: 1; border-right-color: #0369a1; }
+  67%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
 }
 
-@keyframes tickerGlide {
-  0% { transform: translateX(25%); }
-  100% { transform: translateX(-100%); }
+@keyframes typeLine3 {
+  0%, 64% { max-width: 0; opacity: 0; border-right-color: #0369a1; }
+  65% { max-width: 0; opacity: 1; border-right-color: #0369a1; }
+  92% { max-width: 100%; opacity: 1; border-right-color: #0369a1; }
+  97%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
 }
 
-.hero-shell {
+.showcase-card {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 20px 24px;
-  margin-bottom: 18px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+  border: 1px solid #cbd5e1;
+  border-radius: 22px;
+  padding: 24px 26px;
+  margin-bottom: 20px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
 }
 
-.hero-top {
+.big-greetings-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-bottom: 14px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.status-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.led {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-  animation: ledPulse 1.8s infinite ease-in-out;
-}
-.led-blue { background: #0284c7; animation-delay: 0s; }
-.led-teal { background: #0d9488; animation-delay: 0.35s; }
-.led-amber { background: #d97706; animation-delay: 0.7s; }
-
-.badge-pill {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: #0369a1;
-  background: #e0f2fe;
-  border: 1px solid #bae6fd;
-  padding: 3px 10px;
-  border-radius: 999px;
-}
-
-.greeting-wrap {
+  justify-content: center;
   position: relative;
-  min-width: 150px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+  min-height: 54px;
+  padding: 10px 18px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 16px;
 }
 
-.greet-item {
+.big-greet-word {
   position: absolute;
-  right: 0;
-  font-size: 14.5px;
+  font-size: 28px;
   font-weight: 800;
-  padding: 3px 12px;
+  letter-spacing: 0.5px;
+  padding: 4px 20px;
   border-radius: 999px;
   white-space: nowrap;
   opacity: 0;
 }
-.g-ar { color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; animation: seqAr 8s infinite ease-in-out; }
-.g-fr { color: #0f766e; background: #ccfbf1; border: 1px solid #99f6e4; animation: seqFr 8s infinite ease-in-out; }
-.g-en { color: #b45309; background: #fef3c7; border: 1px solid #fde68a; animation: seqEn 8s infinite ease-in-out; }
-.g-amz { color: #6d28d9; background: #ede9fe; border: 1px solid #ddd6fe; animation: seqAmz 8s infinite ease-in-out; }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-  gap: 16px;
-  margin-bottom: 14px;
+.big-greet-ar {
+  font-family: "Cairo", sans-serif;
+  color: #0369a1;
+  background: #e0f2fe;
+  animation: seqAr 9.5s infinite ease-in-out;
+}
+.big-greet-fr {
+  color: #0f766e;
+  background: #ccfbf1;
+  animation: seqFr 9.5s infinite ease-in-out;
+}
+.big-greet-en {
+  color: #b45309;
+  background: #fef3c7;
+  animation: seqEn 9.5s infinite ease-in-out;
+}
+.big-greet-amz {
+  color: #6d28d9;
+  background: #ede9fe;
+  animation: seqAmz 9.5s infinite ease-in-out;
 }
 
-.about-box {
+.academic-stage {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 15px 17px;
-  color: #1e293b;
-  font-size: 14.5px;
-  line-height: 1.75;
+  border-left: 5px solid #0369a1;
+  border-radius: 16px;
+  padding: 18px 20px;
 }
 
-.credits-box {
-  background: linear-gradient(135deg, #f0f9ff 0%, #f0fdfa 100%);
-  border: 1px solid #bae6fd;
-  border-radius: 14px;
-  padding: 15px 17px;
+.line-row {
+  margin-bottom: 12px;
+  line-height: 1.65;
+}
+.line-row:last-child {
+  margin-bottom: 0;
 }
 
-.credits-title {
-  font-size: 11.5px;
+.label-unified {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
   font-weight: 800;
+  letter-spacing: 0.9px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #0284c7;
-  margin-bottom: 8px;
-}
-
-.name-reveal-1 {
-  display: inline-block;
-  overflow: hidden;
-  white-space: nowrap;
-  max-width: 100%;
-  border-right: 2px solid transparent;
-  padding-right: 4px;
-  font-size: 15.5px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  color: #0f172a;
-  margin-bottom: 6px;
-  animation: revealNameOne 7.5s steps(20, end) infinite;
-}
-
-.name-reveal-2 {
-  display: inline-block;
-  overflow: hidden;
-  white-space: nowrap;
-  max-width: 100%;
-  border-right: 2px solid transparent;
-  padding-right: 4px;
-  font-size: 15.5px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  color: #0f766e;
-  margin-bottom: 6px;
-  animation: revealNameTwo 7.5s steps(15, end) infinite;
-}
-
-.supervisor-box {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px dashed #cbd5e1;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #334155;
-}
-
-.ticker-box {
-  width: 100%;
-  overflow: hidden;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 8px 0;
-}
-
-.ticker-track {
-  display: inline-block;
-  white-space: nowrap;
-  font-size: 14px;
-  font-weight: 700;
-  color: #0f172a;
-  animation: tickerGlide 22s linear infinite;
-}
-
-.ticker-tag {
-  background: #e0f2fe;
   color: #0369a1;
-  border: 1px solid #bae6fd;
-  padding: 2px 10px;
-  border-radius: 999px;
-  margin: 0 6px;
+  margin-right: 6px;
+}
+
+.value-styled {
+  font-family: "Plus Jakarta Sans", "Cairo", sans-serif;
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #0f172a;
+}
+
+.type-stream-1 {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  border-right: 2px solid transparent;
+  padding-right: 4px;
+  animation: typeLine1 9.5s steps(36, end) infinite;
+}
+
+.type-stream-2 {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  border-right: 2px solid transparent;
+  padding-right: 4px;
+  animation: typeLine2 9.5s steps(56, end) infinite;
+}
+
+.type-stream-3 {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  border-right: 2px solid transparent;
+  padding-right: 4px;
+  animation: typeLine3 9.5s steps(48, end) infinite;
 }
 
 .sec-head {
@@ -241,7 +187,7 @@ LIGHT_THEME_CSS = """<style>
   padding: 11px 16px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-left: 4px solid #0284c7;
+  border-left: 4px solid #0369a1;
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
 }
@@ -272,7 +218,7 @@ LIGHT_THEME_CSS = """<style>
   padding: 15px 16px;
   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }
-.tile-blue { border-top: 3px solid #0284c7; }
+.tile-blue { border-top: 3px solid #0369a1; }
 .tile-red { border-top: 3px solid #dc2626; background: #fffafa; }
 .tile-green { border-top: 3px solid #059669; background: #f8fdfb; }
 .tile-purple { border-top: 3px solid #7c3aed; }
@@ -296,45 +242,39 @@ LIGHT_THEME_CSS = """<style>
 }
 </style>"""
 
-HERO_HTML = """
-<div class="hero-shell">
-  <div class="hero-top">
-    <div class="status-group">
-      <span class="led led-blue"></span>
-      <span class="led led-teal"></span>
-      <span class="led led-amber"></span>
-      <span class="badge-pill">Credit Scoring • ANN</span>
-    </div>
-    <div class="greeting-wrap">
-      <span class="greet-item g-ar">مرحباً</span>
-      <span class="greet-item g-fr">Bonjour</span>
-      <span class="greet-item g-en">Welcome</span>
-      <span class="greet-item g-amz">ⴰⵣⵓⵍ / Azul</span>
-    </div>
+SHOWCASE_HTML = """
+<div class="showcase-card">
+  <div class="big-greetings-bar">
+    <span class="big-greet-word big-greet-ar">مرحباً</span>
+    <span class="big-greet-word big-greet-fr">Bonjour</span>
+    <span class="big-greet-word big-greet-en">Welcome</span>
+    <span class="big-greet-word big-greet-amz">ⴰⵣⵓⵍ / Azul</span>
   </div>
-  <div class="hero-grid">
-    <div class="about-box">
-      Plateforme analytique d'évaluation du risque de crédit développée dans le cadre du parcours
-      <strong>Master Data Science et Actuariat</strong>, sous l'encadrement de <strong>Prof Benbrahime</strong>.
+  <div class="academic-stage">
+    <div class="line-row">
+      <span class="type-stream-1">
+        <span class="label-unified">ENCADRÉ PAR :</span>
+        <span class="value-styled">Prof Benbrahime</span>
+      </span>
     </div>
-    <div class="credits-box">
-      <div class="credits-title">Réalisé Par :</div>
-      <div><span class="name-reveal-1">ISFAOUI NOUREDDINE</span></div>
-      <div><span class="name-reveal-2">MARYAM LAHMAMI</span></div>
-      <div class="supervisor-box">Encadré Par : Prof Benbrahime</div>
+    <div class="line-row">
+      <span class="type-stream-2">
+        <span class="label-unified">RÉALISÉ PAR :</span>
+        <span class="value-styled">ISFAOUI NOUREDDINE &amp; LAHMAMI MARYEM</span>
+      </span>
     </div>
-  </div>
-  <div class="ticker-box">
-    <div class="ticker-track">
-      Projet : <span class="ticker-tag">Credit Scoring - ANN</span> • Prédiction de la Probabilité de Défaut (PD) •
-      <span class="ticker-tag">Analyse Portefeuille &amp; Risque</span> • Master Data Science et Actuariat
+    <div class="line-row">
+      <span class="type-stream-3">
+        <span class="label-unified">FILIÈRE :</span>
+        <span class="value-styled">Master Data Science et Actuariat</span>
+      </span>
     </div>
   </div>
 </div>
 """
 
 
-def render_section_header(title: str, subtitle: str, accent_color: str = "#0284c7"):
+def render_section_header(title: str, subtitle: str, accent_color: str = "#0369a1"):
     st.markdown(
         f"""
         <div class="sec-head" style="border-left-color: {accent_color};">
@@ -557,15 +497,79 @@ def safe_predict_probabilities(model, preprocessor, df_model_input: pd.DataFrame
         return model.predict(X_proc, verbose=0).reshape(-1)
 
 
+def classify_risk_bucket(prob: float) -> str:
+    if prob < 0.25:
+        return "منخفض جداً / Très faible"
+    if prob < 0.50:
+        return "منخفض إلى متوسط / Faible-Modéré"
+    if prob < 0.75:
+        return "مرتفع / Élevé"
+    return "حرج / Critique"
+
+
 def build_pd_histogram_df(probs: np.ndarray, bins: int = 10) -> pd.DataFrame:
     counts, edges = np.histogram(probs, bins=bins, range=(0.0, 1.0))
     labels = [f"{edges[i]:.2f}-{edges[i+1]:.2f}" for i in range(len(counts))]
     return pd.DataFrame({"Intervalle PD": labels, "Nombre de dossiers": counts}).set_index("Intervalle PD")
 
 
+def build_sensitivity_table(probs: np.ndarray, base_threshold: float) -> pd.DataFrame:
+    candidates = sorted(set([0.30, 0.40, 0.50, round(base_threshold, 4), 0.70, 0.80]))
+    rows = []
+    total = max(1, len(probs))
+    for th in candidates:
+        high_n = int((probs >= th).sum())
+        low_n = int((probs < th).sum())
+        rows.append({
+            "العتبة / Seuil": f"{th:.4f}",
+            "مخاطر مرتفعة / Risque élevé": f"{high_n} ({(high_n/total)*100:.1f}%)",
+            "مخاطر منخفضة / Risque faible": f"{low_n} ({(low_n/total)*100:.1f}%)",
+        })
+    return pd.DataFrame(rows)
+
+
+def build_top_numeric_deviations(df_orig: pd.DataFrame, row_idx, top_n: int = 4) -> pd.DataFrame:
+    num_df = df_orig.select_dtypes(include=[np.number])
+    if num_df.empty or len(num_df) < 2:
+        return pd.DataFrame()
+    row_vals = num_df.loc[row_idx]
+    means = num_df.mean()
+    stds = num_df.std().replace(0, np.nan)
+    z_scores = ((row_vals - means) / stds).abs().dropna()
+    if z_scores.empty:
+        return pd.DataFrame()
+    top_cols = z_scores.sort_values(ascending=False).head(top_n).index.tolist()
+    records = []
+    for col in top_cols:
+        val = float(row_vals[col])
+        avg = float(means[col])
+        records.append({
+            "المتغير / Variable": col,
+            "قيمة الملف / Valeur": round(val, 4),
+            "متوسط المحفظة / Moyenne": round(avg, 4),
+            "الفارق / Écart": round(val - avg, 4),
+        })
+    return pd.DataFrame(records)
+
+
+def build_executive_report(file_name: str, total_rows: int, high_count: int, high_pct: float, mean_pd: float, median_pd: float, threshold: float) -> str:
+    return (
+        "RAPPORT SYNTHÉTIQUE - CREDIT SCORING (ANN)\n"
+        "===========================================\n"
+        f"Fichier analysé : {file_name}\n"
+        f"Seuil de référence : {threshold:.4f}\n"
+        f"Total dossiers : {total_rows}\n"
+        f"Risque élevé : {high_count} ({high_pct:.1f}%)\n"
+        f"PD moyen : {mean_pd:.4f} | Médiane : {median_pd:.4f}\n"
+        "Encadré par : Prof Benbrahime\n"
+        "Réalisé par : ISFAOUI NOUREDDINE & LAHMAMI MARYEM\n"
+        "Filière : Master Data Science et Actuariat\n"
+    )
+
+
 st.markdown(LIGHT_THEME_CSS, unsafe_allow_html=True)
 st.title("Credit Scoring - ANN")
-st.markdown(HERO_HTML, unsafe_allow_html=True)
+st.markdown(SHOWCASE_HTML, unsafe_allow_html=True)
 
 try:
     model, preprocessor, threshold = load_artifacts()
@@ -604,9 +608,12 @@ if uploaded_file is not None:
             st.stop()
 
         preds = (probs >= threshold).astype(int)
+        tiers = [classify_risk_bucket(float(p)) for p in probs]
+
         df_out = df_original.copy()
         df_out["probability"] = np.round(probs, 6)
         df_out["prediction"] = preds
+        df_out["شريحة الخطورة / Segment"] = tiers
         df_out["النتيجة / Résultat"] = np.where(
             preds == 1,
             "تعثر محتمل / Risque élevé (Défaut)",
@@ -619,6 +626,7 @@ if uploaded_file is not None:
         health_score = round(0.6 * col_coverage_pct + 0.4 * cell_fill_pct, 1)
 
         st.session_state["last_file_signature"] = file_signature
+        st.session_state["last_file_name"] = uploaded_file.name
         st.session_state["df_out"] = df_out
         st.session_state["probs"] = probs
         st.session_state["preds"] = preds
@@ -630,6 +638,7 @@ if uploaded_file is not None:
     preds = st.session_state["preds"]
     missing_cols = st.session_state["missing_cols"]
     health_score = st.session_state["health_score"]
+    file_name = st.session_state.get("last_file_name", uploaded_file.name)
 
     if missing_cols:
         st.info(
@@ -647,7 +656,7 @@ if uploaded_file is not None:
     render_section_header(
         "ملخص المحفظة والتوقعات / Résumé du portefeuille",
         "مؤشرات المخاطر الرئيسية وجودة البيانات المدخلة",
-        accent_color="#0284c7",
+        accent_color="#0369a1",
     )
 
     st.markdown(
@@ -682,16 +691,19 @@ if uploaded_file is not None:
         st.warning(f"تنبيه المحفظة / Alerte portefeuille : نسبة المخاطر المرتفعة مرتفعة ({high_risk_pct:.1f}%).")
 
     render_section_header(
-        "توزيع احتمالات التعثر / Distribution des probabilités (PD)",
-        f"توزيع الملفات عبر مجالات الاحتمال من 0 إلى 1 (العتبة المرجعية: {threshold:.4f})",
+        "توزيع الاحتمالات وحساسية العتبة / Distribution & Sensibilité",
+        "توزيع احتمالات التعثر في المحفظة مع مقارنة تأثير العتبات المختلفة",
         accent_color="#7c3aed",
     )
     hist_df = build_pd_histogram_df(probs, bins=10)
-    st.bar_chart(hist_df, height=240)
+    st.bar_chart(hist_df, height=230)
+
+    with st.expander("جدول حساسية العتبات / Analyse de sensibilité aux seuils"):
+        st.dataframe(build_sensitivity_table(probs, threshold), use_container_width=True)
 
     render_section_header(
         "فحص ملف فردي ومقارنته بالمحفظة / Inspecteur individuel",
-        "اختر سطراً لمقارنة احتمال التعثر بمعدل المحفظة والحصول على توصية",
+        "اختر سطراً لمقارنة احتمال التعثر بمعدل المحفظة والاطلاع على أبرز الفوارق العددية",
         accent_color="#059669",
     )
 
@@ -706,17 +718,22 @@ if uploaded_file is not None:
 
     c1, c2, c3 = st.columns(3)
     c1.metric("احتمال التعثر / Probabilité", f"{item_prob:.4f}", delta=f"{diff_vs_mean:+.4f} vs PD moyen")
-    c2.metric("معدل المحفظة / PD moyen", f"{mean_pd:.4f}")
+    c2.metric("شريحة الخطورة / Segment", row_item["شريحة الخطورة / Segment"])
     c3.metric("القرار / Décision", row_item["النتيجة / Résultat"])
 
     if item_pred == 1:
-        st.error("توصية / Recommandation : احتمال التعثر يتجاوز العتبة؛ يُنصح بمراجعة إضافية أو ضمانات إضافية.")
+        st.error("توصية / Recommandation : احتمال التعثر يتجاوز العتبة؛ يُنصح بمراجعة إضافية أو طلب ضمانات إضافية.")
     else:
         st.success("توصية / Recommandation : احتمال التعثر ضمن الحدود المقبولة مقارنة بالعتبة المعتمدة.")
 
+    dev_df = build_top_numeric_deviations(df_out.drop(columns=["probability", "prediction"], errors="ignore"), selected_idx)
+    if not dev_df.empty:
+        st.caption("أبرز المتغيرات الرقمية من حيث الاختلاف عن متوسط المحفظة لهذا الملف:")
+        st.dataframe(dev_df, use_container_width=True)
+
     render_section_header(
         "جدول النتائج والتصدير / Tableau des résultats",
-        "تصفية الملفات وتحميل النتائج النهائية بصيغة CSV",
+        "تصفية الملفات وتحميل النتائج النهائية أو التقرير الملخص",
         accent_color="#d97706",
     )
 
@@ -739,12 +756,31 @@ if uploaded_file is not None:
 
     st.dataframe(filtered_df, use_container_width=True)
 
+    d_col1, d_col2 = st.columns(2)
     export_df = filtered_df.copy()
     export_df["threshold_used"] = round(threshold, 6)
     csv_bytes = export_df.to_csv(index=False).encode("utf-8-sig")
-    st.download_button(
-        label="تحميل النتائج بصيغة CSV / Télécharger les résultats (CSV)",
-        data=csv_bytes,
-        file_name="credit_scoring_predictions.csv",
-        mime="text/csv",
-    )
+    with d_col1:
+        st.download_button(
+            label="تحميل النتائج بصيغة CSV / Télécharger les résultats (CSV)",
+            data=csv_bytes,
+            file_name="credit_scoring_predictions.csv",
+            mime="text/csv",
+        )
+
+    report_text = build_executive_report(
+        file_name=file_name,
+        total_rows=total_rows,
+        high_count=high_risk_count,
+        high_pct=high_risk_pct,
+        mean_pd=mean_pd,
+        median_pd=median_pd,
+        threshold=threshold,
+    ).encode("utf-8")
+    with d_col2:
+        st.download_button(
+            label="تحميل التقرير الملخص / Télécharger le rapport (TXT)",
+            data=report_text,
+            file_name="credit_scoring_summary.txt",
+            mime="text/plain",
+        )
