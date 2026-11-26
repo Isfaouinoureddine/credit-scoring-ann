@@ -299,48 +299,38 @@ APP_CSS = """<style>
 .panel-sub { font-size: 11.5px; color: #94a3b8; }
 </style>"""
 
-SHOWCASE_HTML = """
-<div class="glow-frame">
-  <div class="glow-inner">
-    <div class="header-bar">
-      <div class="bulbs-wrap">
-        <span class="bulb b-cyan"></span>
-        <span class="bulb b-green"></span>
-        <span class="bulb b-amber"></span>
-        <span class="bulb b-violet"></span>
-      </div>
-      <div class="greet-box">
-        <span class="greet-tag gt-ar">مرحباً</span>
-        <span class="greet-tag gt-amz">ⴰⵣⵓⵍ</span>
-        <span class="greet-tag gt-fr">Bonjour</span>
-        <span class="greet-tag gt-en">Welcome</span>
-      </div>
-    </div>
-
-    <div class="info-box">
-      <div class="section-lbl">RÉALISÉ PAR :</div>
-      <div class="row-line small-txt">
-        <span class="type-1">ISFAOUI NOUREDDINE</span>
-      </div>
-      <div class="row-line small-txt">
-        <span class="type-2">LAHMAMI MARYEM</span>
-      </div>
-      <div class="row-line small-txt" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(148, 163, 184, 0.2);">
-        <span class="type-3"><span class="role-prefix">Encadré Par :</span> Prof Benbrahime</span>
-      </div>
-      <div class="row-line small-txt">
-        <span class="type-4">Master Data Science et Actuariat - FEG SETTAT</span>
-      </div>
-    </div>
-
-    <div class="shuttle-track">
-      <div class="shuttle-item">
-        Projet : <span class="shuttle-pill">Credit Scoring - ANN</span>
-      </div>
-    </div>
-  </div>
-</div>
-"""
+SHOWCASE_HTML = (
+    '<div class="glow-frame">'
+    '<div class="glow-inner">'
+    '<div class="header-bar">'
+    '<div class="bulbs-wrap">'
+    '<span class="bulb b-cyan"></span>'
+    '<span class="bulb b-green"></span>'
+    '<span class="bulb b-amber"></span>'
+    '<span class="bulb b-violet"></span>'
+    '</div>'
+    '<div class="greet-box">'
+    '<span class="greet-tag gt-ar">مرحباً</span>'
+    '<span class="greet-tag gt-amz">ⴰⵣⵓⵍ</span>'
+    '<span class="greet-tag gt-fr">Bonjour</span>'
+    '<span class="greet-tag gt-en">Welcome</span>'
+    '</div>'
+    '</div>'
+    '<div class="info-box">'
+    '<div class="section-lbl">RÉALISÉ PAR :</div>'
+    '<div class="row-line small-txt"><span class="type-1">ISFAOUI NOUREDDINE</span></div>'
+    '<div class="row-line small-txt"><span class="type-2">LAHMAMI MARYEM</span></div>'
+    '<div class="row-line small-txt" style="margin-top:8px;padding-top:8px;border-top:1px dashed rgba(148,163,184,0.2);">'
+    '<span class="type-3"><span class="role-prefix">Encadré Par :</span> Prof Benbrahime</span>'
+    '</div>'
+    '<div class="row-line small-txt"><span class="type-4">Master Data Science et Actuariat - FEG SETTAT</span></div>'
+    '</div>'
+    '<div class="shuttle-track">'
+    '<div class="shuttle-item">Projet : <span class="shuttle-pill">Credit Scoring - ANN</span></div>'
+    '</div>'
+    '</div>'
+    '</div>'
+)
 
 
 @st.cache_resource
@@ -444,7 +434,8 @@ def read_pdf_tables(raw_bytes: bytes) -> pd.DataFrame:
             for table in (page.extract_tables() or []):
                 if len(table) > 1:
                     headers = [str(h).strip() if h else f"col_{i}" for i, h in enumerate(table[0])]
-                    tables_dfs.append(pd.DataFrame(table[1:], columns=headers))
+                    rows = table[1:]
+                    tables_dfs.append(pd.DataFrame(rows, columns=headers))
     if not tables_dfs:
         raise ValueError("لم يتم العثور على جدول منظم داخل ملف PDF.")
     return pd.concat(tables_dfs, ignore_index=True)
@@ -698,41 +689,35 @@ if uploaded_file is not None:
     mean_pd = float(np.mean(probs))
     median_pd = float(np.median(probs))
 
-    st.markdown(
-        f"""
-        <div class="kpi-grid">
-          <div class="kpi-card k-blue">
-            <div class="k-title">إجمالي الملفات / Total dossiers</div>
-            <div class="k-num">{total_rows:,}</div>
-            <div class="k-sub">Qualité données : {health_score}%</div>
-          </div>
-          <div class="kpi-card k-amber">
-            <div class="k-title">مخاطر مرتفعة / Risque élevé</div>
-            <div class="k-num">{high_count} ({high_pct:.1f}%)</div>
-            <div class="k-sub">Probabilité ≥ {threshold:.4f}</div>
-          </div>
-          <div class="kpi-card k-green">
-            <div class="k-title">مخاطر منخفضة / Risque faible</div>
-            <div class="k-num">{low_count} ({low_pct:.1f}%)</div>
-            <div class="k-sub">Probabilité &lt; {threshold:.4f}</div>
-          </div>
-          <div class="kpi-card k-purple">
-            <div class="k-title">متوسط الاحتمال / PD moyen</div>
-            <div class="k-num">{mean_pd:.4f}</div>
-            <div class="k-sub">Médiane : {median_pd:.4f}</div>
-          </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    kpi_html = (
+        '<div class="kpi-grid">'
+        '<div class="kpi-card k-blue">'
+        '<div class="k-title">إجمالي الملفات / Total dossiers</div>'
+        f'<div class="k-num">{total_rows:,}</div>'
+        f'<div class="k-sub">Qualité données : {health_score}%</div>'
+        '</div>'
+        '<div class="kpi-card k-amber">'
+        '<div class="k-title">مخاطر مرتفعة / Risque élevé</div>'
+        f'<div class="k-num">{high_count} ({high_pct:.1f}%)</div>'
+        f'<div class="k-sub">Probabilité ≥ {threshold:.4f}</div>'
+        '</div>'
+        '<div class="kpi-card k-green">'
+        '<div class="k-title">مخاطر منخفضة / Risque faible</div>'
+        f'<div class="k-num">{low_count} ({low_pct:.1f}%)</div>'
+        f'<div class="k-sub">Probabilité &lt; {threshold:.4f}</div>'
+        '</div>'
+        '<div class="kpi-card k-purple">'
+        '<div class="k-title">متوسط الاحتمال / PD moyen</div>'
+        f'<div class="k-num">{mean_pd:.4f}</div>'
+        f'<div class="k-sub">Médiane : {median_pd:.4f}</div>'
+        '</div>'
+        '</div>'
     )
+    st.markdown(kpi_html, unsafe_allow_html=True)
 
     st.markdown(
-        """
-        <div class="panel-card">
-          <div class="panel-title">توزيع الاحتمالات وحساسية العتبة / Distribution &amp; Sensibilité</div>
-          <div class="panel-sub">توزيع احتمالات التعثر في المحفظة ومقارنة العتبات</div>
-        </div>
-        """,
+        '<div class="panel-card"><div class="panel-title">توزيع الاحتمالات وحساسية العتبة / Distribution &amp; Sensibilité</div>'
+        '<div class="panel-sub">توزيع احتمالات التعثر في المحفظة ومقارنة العتبات</div></div>',
         unsafe_allow_html=True,
     )
     st.bar_chart(build_pd_histogram_df(probs, bins=10), height=220)
@@ -741,12 +726,8 @@ if uploaded_file is not None:
         st.dataframe(build_sensitivity_table(probs, threshold), use_container_width=True)
 
     st.markdown(
-        """
-        <div class="panel-card">
-          <div class="panel-title">فحص ملف فردي / Inspecteur individuel</div>
-          <div class="panel-sub">مقارنة الملف المختار بمتوسط المحفظة وأبرز الفوارق العددية</div>
-        </div>
-        """,
+        '<div class="panel-card"><div class="panel-title">فحص ملف فردي / Inspecteur individuel</div>'
+        '<div class="panel-sub">مقارنة الملف المختار بمتوسط المحفظة وأبرز الفوارق العددية</div></div>',
         unsafe_allow_html=True,
     )
     selected_idx = st.selectbox("اختر رقم السطر / Sélectionner une ligne", options=df_out.index.tolist())
