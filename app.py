@@ -23,6 +23,19 @@ LIGHT_THEME_CSS = """<style>
   font-family: "Plus Jakarta Sans", "Cairo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+@keyframes ledBlinkLight {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1.18);
+    box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
+  }
+  50% {
+    opacity: 0.25;
+    transform: scale(0.82);
+    box-shadow: 0 0 2px currentColor;
+  }
+}
+
 @keyframes seqAr {
   0%, 22% { opacity: 1; transform: translateY(0); }
   25%, 100% { opacity: 0; transform: translateY(4px); }
@@ -63,34 +76,79 @@ LIGHT_THEME_CSS = """<style>
   97%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
 }
 
+@keyframes projectRightToLeft {
+  0% { transform: translateX(35%); }
+  100% { transform: translateX(-100%); }
+}
+
 .showcase-card {
   background: #ffffff;
   border: 1px solid #cbd5e1;
   border-radius: 22px;
-  padding: 24px 26px;
+  padding: 22px 24px;
   margin-bottom: 20px;
   box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
 }
 
-.big-greetings-bar {
+.top-leds-greetings {
   display: flex;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  min-height: 54px;
-  padding: 10px 18px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
   background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%);
   border: 1px solid #bae6fd;
   border-radius: 16px;
 }
 
+.led-group {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.led-bulb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  animation: ledBlinkLight 1.5s infinite ease-in-out;
+}
+.bulb-sky { background: #0284c7; color: #0284c7; animation-delay: 0s; }
+.bulb-emerald { background: #059669; color: #059669; animation-delay: 0.3s; }
+.bulb-amber { background: #d97706; color: #d97706; animation-delay: 0.6s; }
+.bulb-violet { background: #7c3aed; color: #7c3aed; animation-delay: 0.9s; }
+
+.live-tag {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #6ee7b7;
+  padding: 2px 10px;
+  border-radius: 999px;
+  margin-left: 4px;
+}
+
+.big-greetings-box {
+  position: relative;
+  min-width: 210px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+}
+
 .big-greet-word {
   position: absolute;
-  font-size: 28px;
+  right: 0;
+  font-size: 27px;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  padding: 4px 20px;
+  letter-spacing: 0.4px;
+  padding: 4px 18px;
   border-radius: 999px;
   white-space: nowrap;
   opacity: 0;
@@ -100,21 +158,25 @@ LIGHT_THEME_CSS = """<style>
   font-family: "Cairo", sans-serif;
   color: #0369a1;
   background: #e0f2fe;
+  border: 1px solid #bae6fd;
   animation: seqAr 9.5s infinite ease-in-out;
 }
 .big-greet-fr {
   color: #0f766e;
   background: #ccfbf1;
+  border: 1px solid #99f6e4;
   animation: seqFr 9.5s infinite ease-in-out;
 }
 .big-greet-en {
   color: #b45309;
   background: #fef3c7;
+  border: 1px solid #fde68a;
   animation: seqEn 9.5s infinite ease-in-out;
 }
 .big-greet-amz {
   color: #6d28d9;
   background: #ede9fe;
+  border: 1px solid #ddd6fe;
   animation: seqAmz 9.5s infinite ease-in-out;
 }
 
@@ -124,10 +186,11 @@ LIGHT_THEME_CSS = """<style>
   border-left: 5px solid #0369a1;
   border-radius: 16px;
   padding: 18px 20px;
+  margin-bottom: 14px;
 }
 
 .line-row {
-  margin-bottom: 12px;
+  margin-bottom: 11px;
   line-height: 1.65;
 }
 .line-row:last-child {
@@ -148,7 +211,7 @@ LIGHT_THEME_CSS = """<style>
   font-family: "Plus Jakarta Sans", "Cairo", sans-serif;
   font-size: 16.5px;
   font-weight: 700;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.35px;
   color: #0f172a;
 }
 
@@ -180,6 +243,36 @@ LIGHT_THEME_CSS = """<style>
   border-right: 2px solid transparent;
   padding-right: 4px;
   animation: typeLine3 9.5s steps(48, end) infinite;
+}
+
+.project-marquee-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 9px 0;
+}
+
+.project-marquee-mover {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 15.5px;
+  font-weight: 800;
+  color: #0f172a;
+  animation: projectRightToLeft 20s linear infinite;
+}
+.project-marquee-mover:hover {
+  animation-play-state: paused;
+}
+
+.project-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  padding: 2px 12px;
+  border-radius: 999px;
+  margin: 0 6px;
 }
 
 .sec-head {
@@ -244,12 +337,22 @@ LIGHT_THEME_CSS = """<style>
 
 SHOWCASE_HTML = """
 <div class="showcase-card">
-  <div class="big-greetings-bar">
-    <span class="big-greet-word big-greet-ar">مرحباً</span>
-    <span class="big-greet-word big-greet-fr">Bonjour</span>
-    <span class="big-greet-word big-greet-en">Welcome</span>
-    <span class="big-greet-word big-greet-amz">ⴰⵣⵓⵍ / Azul</span>
+  <div class="top-leds-greetings">
+    <div class="led-group">
+      <span class="led-bulb bulb-sky"></span>
+      <span class="led-bulb bulb-emerald"></span>
+      <span class="led-bulb bulb-amber"></span>
+      <span class="led-bulb bulb-violet"></span>
+      <span class="live-tag">ANN • LIVE</span>
+    </div>
+    <div class="big-greetings-box">
+      <span class="big-greet-word big-greet-ar">مرحباً</span>
+      <span class="big-greet-word big-greet-fr">Bonjour</span>
+      <span class="big-greet-word big-greet-en">Welcome</span>
+      <span class="big-greet-word big-greet-amz">ⴰⵣⵓⵍ / Azul</span>
+    </div>
   </div>
+
   <div class="academic-stage">
     <div class="line-row">
       <span class="type-stream-1">
@@ -268,6 +371,13 @@ SHOWCASE_HTML = """
         <span class="label-unified">FILIÈRE :</span>
         <span class="value-styled">Master Data Science et Actuariat</span>
       </span>
+    </div>
+  </div>
+
+  <div class="project-marquee-wrap">
+    <div class="project-marquee-mover">
+      Projet : <span class="project-badge">Credit Scoring - ANN</span> • Prédiction de la Probabilité de Défaut (PD) •
+      <span class="project-badge">Credit Scoring - ANN</span> • Modèle Réseau de Neurones
     </div>
   </div>
 </div>
