@@ -1,3 +1,4 @@
+import io
 import json
 import joblib
 import numpy as np
@@ -86,30 +87,145 @@ html_block = """<style>
 
 st.markdown(html_block, unsafe_allow_html=True)
 
-model = load_model("ann_model.keras")
-preprocessor = joblib.load("preprocessor.pkl")
-with open("threshold.json", encoding="utf-8") as f:
-    threshold = float(json.load(f)["threshold"])
+@st.cache_resource
+def load_artifacts():
+    model = load_model("ann_model.keras")
+    preprocessor = joblib.load("preprocessor.pkl")
+    with open("threshold.json", encoding="utf-8") as f:
+        threshold = float(json.load(f)["threshold"])
+    return model, preprocessor, threshold
 
-uploaded_file = st.file_uploader("ارفع ملف للتجربة (CSV أو Excel)", type=["csv", "xlsx"])
+def read_csv_smart(file_obj):
+    raw_bytes = file_obj.getvalue()
+    for enc in ("utf-8", "latin1"):
+        try:
+            text = raw_bytes.decode(enc)
+            sep = ";" if text.count(";") > text.count(",") else ","
+            return pd.read_csv(io.StringIO(text), sep=sep)
+        except Exception:
+            continue
+    raise ValueError("تعذر قراءة ملف CSV / Impossible de lire le fichier CSV.")
+
+def read_pdf_tables(file_obj):
+    try:
+        import pdfplumber
+    except ImportError as exc:
+        raise ImportError("مكتبة pdfplumber غير مثبّتة لقراءة جداول PDF.") from exc
+
+    tables_dfs = []
+    with pdfplumber.open(io.BytesIO(file_obj.getvalue())) as pdf:
+        for page in pdf.pages:
+            extracted = page.extract_tables() or []
+            for table in extracted:
+                if len(table) > 1:
+                    headers = [str(h).strip() if h else f"col_{i}" for i, h in enumerate(table[0])]
+                    rows = table[1:]
+                    tables_dfs.append(pd.DataFrame(rows, columns=headers))
+
+    if not tables_dfs:
+        raise ValueError("لم يتم العثور على جدول منظم داخل ملف PDF / Aucun tableau structuré trouvé dans le PDF.")
+    return pd.concat(tables_dfs, ignore_index=True)
+
+def load_uploaded_dataframe(file_obj):
+    name = file_obj.name.lower()
+    if name.endswith(".csv"):
+        return read_csv_smart(file_obj)
+    if name.endswith(".xlsx"):
+        return pd.read_excel(file_obj, engine="openpyxl")
+    if name.endswith(".xls"):
+        return pd.read_excel(file_obj)
+    if name.endswith(".json"):
+        raw_text = file_obj.getvalue().decode("utf-8")
+        data = json.loads(raw_text)
+        return pd.json_normalize(data) if isinstance(data, (list, dict)) else pd.read_json(io.StringIO(raw_text))
+    if name.endswith((".tsv", ".txt")):
+        text = file_obj.getvalue().decode("utf-8", errors="replace")
+        sep = "\t" if "\t" in text else (";" if text.count(";") > text.count(",") else ",")
+        return pd.read_csv(io.StringIO(text), sep=sep)
+    if name.endswith(".parquet"):
+        return pd.read_parquet(io.BytesIO(file_obj.getvalue()))
+    if name.endswith(".pdf"):
+        return read_pdf_tables(file_obj)
+    raise ValueError("صيغة الملف غير مدعومة / Format de fichier non supporté.")
+
+try:
+    model, preprocessor, threshold = load_artifacts()
+except Exception as e:
+    st.error(f"خطأ في تحميل ملفات النموذج / Erreur de chargement : {e}")
+    st.stop()
+
+st.caption(f"العتبة المعتمدة / Seuil de décision (threshold) : **{threshold:.4f}**")
+
+uploaded_file = st.file_uploader(
+    "ارفع ملف للتجربة / Charger un fichier (CSV, XLSX, XLS, JSON, TSV, TXT, Parquet, PDF)",
+    type=["csv", "xlsx", "xls", "json", "tsv", "txt", "parquet", "pdf"]
+)
 
 if uploaded_file is not None:
-    file_name = uploaded_file.name.lower()
-    if file_name.endswith(".csv"):
-        try:
-            df = pd.read_csv(uploaded_file)
-        except UnicodeDecodeError:
-            uploaded_file.seek(0)
-            df = pd.read_csv(uploaded_file, encoding="latin1")
-    elif file_name.endswith(".xlsx"):
-        df = pd.read_excel(uploaded_file, engine="openpyxl")
-    else:
-        st.error("صيغة الملف غير مدعومة. المرجو رفع ملف CSV أو Excel (.xlsx).")
+    try:
+        df = load_uploaded_dataframe(uploaded_file)
+    except Exception as e:
+        st.error(f"تعذر معالجة الملف المرفوع / Erreur de lecture : {e}")
         st.stop()
 
-    X_proc = preprocessor.transform(df)
-    probs = model.predict(X_proc, verbose=0).reshape(-1)
+    if df.empty:
+        st.warning("الملف فارغ / Le fichier est vide.")
+        st.stop()
+
+    try:
+        X_proc = preprocessor.transform(df)
+        probs = model.predict(X_proc, verbose=0).reshape(-1)
+    except Exception as e:
+        st.error(f"خطأ أثناء تجهيز البيانات أو التنبؤ / Erreur lors de la prédiction : {e}")
+        st.stop()
+
     preds = (probs >= threshold).astype(int)
-    df["probability"] = probs
-    df["prediction"] = np.where(preds == 1, 1, 0)
-    st.dataframe(df)
+
+    df_out = df.copy()
+    df_out["probability"] = np.round(probs, 6)
+    df_out["prediction"] = preds
+    df_out["النتيجة / Résultat"] = np.where(
+        preds == 1,
+        "تعثر محتمل / Risque élevé (Défaut)",
+        "سداد محتمل / Risque faible (Bon client)"
+    )
+
+    total_rows = len(df_out)
+    high_risk_count = int((preds == 1).sum())
+    low_risk_count = int((preds == 0).sum())
+    high_risk_pct = (high_risk_count / total_rows) * 100 if total_rows else 0.0
+    low_risk_pct = (low_risk_count / total_rows) * 100 if total_rows else 0.0
+
+    st.subheader("ملخص التوقعات / Résumé des prédictions")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("إجمالي الملفات / Total dossiers", total_rows)
+    c2.metric("مخاطر مرتفعة / Risque élevé", f"{high_risk_count} ({high_risk_pct:.1f}%)")
+    c3.metric("مخاطر منخفضة / Risque faible", f"{low_risk_count} ({low_risk_pct:.1f}%)")
+
+    filter_choice = st.radio(
+        "تصفية النتائج / Filtrer les résultats :",
+        options=[
+            "الكل / Tous",
+            "مخاطر مرتفعة فقط / Risque élevé",
+            "مخاطر منخفضة فقط / Risque faible"
+        ],
+        horizontal=True
+    )
+
+    if filter_choice == "مخاطر مرتفعة فقط / Risque élevé":
+        filtered_df = df_out[df_out["prediction"] == 1]
+    elif filter_choice == "مخاطر منخفضة فقط / Risque faible":
+        filtered_df = df_out[df_out["prediction"] == 0]
+    else:
+        filtered_df = df_out
+
+    st.subheader("جدول النتائج / Tableau des résultats")
+    st.dataframe(filtered_df, use_container_width=True)
+
+    csv_bytes = filtered_df.to_csv(index=False).encode("utf-8-sig")
+    st.download_button(
+        label="تحميل النتائج بصيغة CSV / Télécharger les résultats (CSV)",
+        data=csv_bytes,
+        file_name="credit_scoring_predictions.csv",
+        mime="text/csv"
+    )
