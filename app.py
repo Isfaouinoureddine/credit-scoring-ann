@@ -9,295 +9,334 @@ import streamlit as st
 from tensorflow.keras.models import load_model
 
 st.set_page_config(
-    page_title="Credit Scoring - ANN | FEG Settat",
+    page_title="Credit Scoring - ANN | FEG SETTAT",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-LIGHT_DASHBOARD_CSS = """<style>
+APP_CSS = """<style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
 .stApp {
-  background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 50%, #f1f5f9 100%);
-  color: #0f172a;
+  background: radial-gradient(circle at 15% 12%, #13223e 0%, #090f1d 52%, #050811 100%);
+  color: #f8fafc;
   font-family: "Plus Jakarta Sans", "Cairo", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-section[data-testid="stSidebar"] {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  border-right: 1px solid #cbd5e1;
-}
-section[data-testid="stSidebar"] * {
-  color: #0f172a !important;
-}
-
-@keyframes ledPulseLight {
+@keyframes bulbBlink {
   0%, 100% {
     opacity: 1;
-    transform: scale(1.16);
-    box-shadow: 0 0 8px currentColor;
+    transform: scale(1.18);
+    box-shadow: 0 0 8px currentColor, 0 0 16px currentColor;
   }
   50% {
-    opacity: 0.28;
-    transform: scale(0.84);
+    opacity: 0.22;
+    transform: scale(0.82);
     box-shadow: 0 0 1px currentColor;
   }
 }
 
-@keyframes seqAr {
-  0%, 22% { opacity: 1; }
-  25%, 100% { opacity: 0; }
+@keyframes greetAr {
+  0%, 22% { opacity: 1; transform: translateY(0); }
+  25%, 100% { opacity: 0; transform: translateY(3px); }
 }
-@keyframes seqFr {
-  0%, 24% { opacity: 0; }
-  27%, 47% { opacity: 1; }
-  50%, 100% { opacity: 0; }
+@keyframes greetAmz {
+  0%, 24% { opacity: 0; transform: translateY(3px); }
+  27%, 47% { opacity: 1; transform: translateY(0); }
+  50%, 100% { opacity: 0; transform: translateY(3px); }
 }
-@keyframes seqEn {
-  0%, 49% { opacity: 0; }
-  52%, 72% { opacity: 1; }
-  75%, 100% { opacity: 0; }
+@keyframes greetFr {
+  0%, 49% { opacity: 0; transform: translateY(3px); }
+  52%, 72% { opacity: 1; transform: translateY(0); }
+  75%, 100% { opacity: 0; transform: translateY(3px); }
 }
-@keyframes seqAmz {
-  0%, 74% { opacity: 0; }
-  77%, 97% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-@keyframes stepFade1 {
-  0%, 10% { opacity: 0.35; transform: translateX(6px); }
-  22%, 100% { opacity: 1; transform: translateX(0); }
-}
-@keyframes stepFade2 {
-  0%, 30% { opacity: 0.25; transform: translateX(6px); }
-  45%, 100% { opacity: 1; transform: translateX(0); }
-}
-@keyframes stepFade3 {
-  0%, 52% { opacity: 0.25; transform: translateX(6px); }
-  68%, 100% { opacity: 1; transform: translateX(0); }
+@keyframes greetEn {
+  0%, 74% { opacity: 0; transform: translateY(3px); }
+  77%, 97% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(3px); }
 }
 
-@keyframes projectTicker {
-  0% { transform: translateX(25%); }
-  100% { transform: translateX(-100%); }
+@keyframes charStep1 {
+  0% { max-width: 0; border-right-color: #38bdf8; }
+  22% { max-width: 100%; border-right-color: #38bdf8; }
+  25%, 100% { max-width: 100%; border-right-color: transparent; }
 }
 
-.top-banner {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 18px;
-  padding: 16px 18px;
+@keyframes charStep2 {
+  0%, 24% { max-width: 0; opacity: 0; border-right-color: #34d399; }
+  25% { max-width: 0; opacity: 1; border-right-color: #34d399; }
+  48% { max-width: 100%; opacity: 1; border-right-color: #34d399; }
+  51%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
+}
+
+@keyframes charStep3 {
+  0%, 50% { max-width: 0; opacity: 0; border-right-color: #fbbf24; }
+  51% { max-width: 0; opacity: 1; border-right-color: #fbbf24; }
+  73% { max-width: 100%; opacity: 1; border-right-color: #fbbf24; }
+  76%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
+}
+
+@keyframes charStep4 {
+  0%, 75% { max-width: 0; opacity: 0; border-right-color: #c084fc; }
+  76% { max-width: 0; opacity: 1; border-right-color: #c084fc; }
+  95% { max-width: 100%; opacity: 1; border-right-color: #c084fc; }
+  98%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
+}
+
+@keyframes goAndBack {
+  0% { transform: translateX(0%); }
+  50% { transform: translateX(28%); }
+  100% { transform: translateX(0%); }
+}
+
+.glow-frame {
+  padding: 2px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.55), rgba(52, 211, 153, 0.35), rgba(192, 132, 252, 0.5));
+  box-shadow: 0 14px 34px rgba(2, 132, 199, 0.22);
   margin-bottom: 16px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
-.banner-head {
+.glow-inner {
+  background: linear-gradient(160deg, #0d172a 0%, #09101e 100%);
+  border-radius: 18px;
+  padding: 15px 17px;
+}
+
+.header-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 10px;
-  padding-bottom: 12px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid #e2e8f0;
+  gap: 8px;
+  padding-bottom: 11px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.16);
 }
 
-.led-row {
+.bulbs-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.led-dot {
-  width: 11px;
-  height: 11px;
+
+.bulb {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   display: inline-block;
-  animation: ledPulseLight 1.6s infinite ease-in-out;
+  animation: bulbBlink 1.5s infinite ease-in-out;
 }
-.d-sky { background: #0284c7; color: #0284c7; animation-delay: 0s; }
-.d-emerald { background: #059669; color: #059669; animation-delay: 0.3s; }
-.d-amber { background: #d97706; color: #d97706; animation-delay: 0.6s; }
+.b-cyan { background: #38bdf8; color: #38bdf8; animation-delay: 0s; }
+.b-green { background: #34d399; color: #34d399; animation-delay: 0.25s; }
+.b-amber { background: #fbbf24; color: #fbbf24; animation-delay: 0.5s; }
+.b-violet { background: #c084fc; color: #c084fc; animation-delay: 0.75s; }
 
-.online-pill {
-  font-size: 11.5px;
-  font-weight: 800;
-  color: #065f46;
-  background: #d1fae5;
-  border: 1px solid #6ee7b7;
-  padding: 2px 10px;
-  border-radius: 999px;
-}
-
-.greet-stage {
+.greet-box {
   position: relative;
-  min-width: 140px;
-  height: 36px;
+  min-width: 110px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
-.greet-badge {
+
+.greet-tag {
   position: absolute;
   right: 0;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 800;
-  padding: 2px 14px;
+  padding: 2px 12px;
   border-radius: 999px;
   white-space: nowrap;
   opacity: 0;
 }
-.gb-ar { font-family: "Cairo", sans-serif; color: #0369a1; background: #e0f2fe; border: 1px solid #bae6fd; animation: seqAr 9s infinite ease-in-out; }
-.gb-fr { color: #0f766e; background: #ccfbf1; border: 1px solid #99f6e4; animation: seqFr 9s infinite ease-in-out; }
-.gb-en { color: #b45309; background: #fef3c7; border: 1px solid #fde68a; animation: seqEn 9s infinite ease-in-out; }
-.gb-amz { color: #6d28d9; background: #ede9fe; border: 1px solid #ddd6fe; animation: seqAmz 9s infinite ease-in-out; }
+.gt-ar { font-family: "Cairo", sans-serif; color: #7dd3fc; background: rgba(56, 189, 248, 0.18); border: 1px solid rgba(125, 211, 252, 0.35); animation: greetAr 10s infinite ease-in-out; }
+.gt-amz { color: #e9d5ff; background: rgba(192, 132, 252, 0.18); border: 1px solid rgba(216, 180, 254, 0.35); animation: greetAmz 10s infinite ease-in-out; }
+.gt-fr { color: #6ee7b7; background: rgba(52, 211, 153, 0.18); border: 1px solid rgba(110, 231, 183, 0.35); animation: greetFr 10s infinite ease-in-out; }
+.gt-en { color: #fde68a; background: rgba(251, 191, 36, 0.18); border: 1px solid rgba(253, 230, 138, 0.35); animation: greetEn 10s infinite ease-in-out; }
 
-.academic-panel {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-left: 4px solid #0284c7;
+.info-box {
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 14px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   margin-bottom: 12px;
 }
 
-.acad-line {
-  margin-bottom: 8px;
-  line-height: 1.55;
-  word-wrap: break-word;
+.section-lbl {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: #38bdf8;
+  margin-bottom: 6px;
 }
-.acad-line:last-child {
+
+.row-line {
+  margin-bottom: 6px;
+  line-height: 1.45;
+  min-height: 22px;
+}
+.row-line:last-child {
   margin-bottom: 0;
 }
 
-.acad-label {
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: #0369a1;
-  margin-right: 6px;
-}
-
-.acad-val {
-  font-size: 14.5px;
+.small-txt {
+  font-size: 13px;
   font-weight: 700;
-  color: #0f172a;
+  letter-spacing: 0.3px;
+  color: #f1f5f9;
 }
 
-.anim-1 { display: inline-block; animation: stepFade1 8s ease-out infinite; }
-.anim-2 { display: inline-block; animation: stepFade2 8s ease-out infinite; }
-.anim-3 { display: inline-block; animation: stepFade3 8s ease-out infinite; }
+.role-prefix {
+  font-size: 12px;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-right: 4px;
+}
 
-.marquee-box {
+.type-1 {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  border-right: 2px solid transparent;
+  padding-right: 3px;
+  color: #f8fafc;
+  animation: charStep1 10s steps(22, end) infinite;
+}
+
+.type-2 {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  border-right: 2px solid transparent;
+  padding-right: 3px;
+  color: #6ee7b7;
+  animation: charStep2 10s steps(18, end) infinite;
+}
+
+.type-3 {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  border-right: 2px solid transparent;
+  padding-right: 3px;
+  color: #fde68a;
+  animation: charStep3 10s steps(32, end) infinite;
+}
+
+.type-4 {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  max-width: 100%;
+  border-right: 2px solid transparent;
+  padding-right: 3px;
+  color: #e9d5ff;
+  animation: charStep4 10s steps(44, end) infinite;
+}
+
+.shuttle-track {
   width: 100%;
   overflow: hidden;
-  background: #f1f5f9;
-  border: 1px solid #cbd5e1;
+  background: rgba(30, 41, 59, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 10px;
-  padding: 7px 0;
+  padding: 6px 10px;
 }
-.marquee-text {
+
+.shuttle-item {
   display: inline-block;
-  white-space: nowrap;
-  font-size: 13.5px;
+  font-size: 12.5px;
   font-weight: 800;
-  color: #0f172a;
-  animation: projectTicker 20s linear infinite;
+  color: #e2e8f0;
+  animation: goAndBack 5.5s ease-in-out infinite;
 }
-.marquee-chip {
-  background: #e0f2fe;
-  border: 1px solid #bae6fd;
-  color: #0369a1;
-  padding: 1px 10px;
+
+.shuttle-pill {
+  background: rgba(56, 189, 248, 0.22);
+  border: 1px solid rgba(125, 211, 252, 0.42);
+  color: #ffffff;
+  padding: 1px 9px;
   border-radius: 999px;
-  margin: 0 5px;
+  margin: 0 4px;
 }
 
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
 .kpi-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+.k-blue { border-top: 3px solid #38bdf8; }
+.k-green { border-top: 3px solid #34d399; }
+.k-amber { border-top: 3px solid #fbbf24; }
+.k-purple { border-top: 3px solid #c084fc; }
+
+.k-title { font-size: 11.5px; font-weight: 700; color: #94a3b8; margin-bottom: 4px; }
+.k-num { font-size: 21px; font-weight: 800; color: #ffffff; line-height: 1.2; }
+.k-sub { font-size: 11px; color: #cbd5e1; margin-top: 4px; }
+
+.panel-card {
+  background: rgba(15, 23, 42, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 14px;
   padding: 13px 15px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  margin-bottom: 12px;
 }
-.k-blue { border-top: 3px solid #0284c7; }
-.k-green { border-top: 3px solid #059669; background: #f8fdfb; }
-.k-amber { border-top: 3px solid #d97706; background: #fffdf7; }
-.k-purple { border-top: 3px solid #7c3aed; }
-
-.k-title { font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 4px; }
-.k-num { font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1.2; }
-.k-sub { font-size: 11.5px; color: #64748b; margin-top: 4px; }
-
-.glass-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 15px 17px;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-}
-.card-heading {
-  font-size: 15.5px;
-  font-weight: 800;
-  color: #0f172a;
-  margin-bottom: 3px;
-}
-.card-desc {
-  font-size: 12px;
-  color: #64748b;
-}
+.panel-title { font-size: 14.5px; font-weight: 800; color: #f8fafc; margin-bottom: 2px; }
+.panel-sub { font-size: 11.5px; color: #94a3b8; }
 </style>"""
 
-TOP_BANNER_HTML = """
-<div class="top-banner">
-  <div class="banner-head">
-    <div class="led-row">
-      <span class="led-dot d-sky"></span>
-      <span class="led-dot d-emerald"></span>
-      <span class="led-dot d-amber"></span>
-      <span class="online-pill">ANN • LIVE</span>
+SHOWCASE_HTML = """
+<div class="glow-frame">
+  <div class="glow-inner">
+    <div class="header-bar">
+      <div class="bulbs-wrap">
+        <span class="bulb b-cyan"></span>
+        <span class="bulb b-green"></span>
+        <span class="bulb b-amber"></span>
+        <span class="bulb b-violet"></span>
+      </div>
+      <div class="greet-box">
+        <span class="greet-tag gt-ar">مرحباً</span>
+        <span class="greet-tag gt-amz">ⴰⵣⵓⵍ</span>
+        <span class="greet-tag gt-fr">Bonjour</span>
+        <span class="greet-tag gt-en">Welcome</span>
+      </div>
     </div>
-    <div class="greet-stage">
-      <span class="greet-badge gb-ar">مرحباً</span>
-      <span class="greet-badge gb-fr">Bonjour</span>
-      <span class="greet-badge gb-en">Welcome</span>
-      <span class="greet-badge gb-amz">ⴰⵣⵓⵍ / Azul</span>
-    </div>
-  </div>
 
-  <div class="academic-panel">
-    <div class="acad-line">
-      <span class="anim-1">
-        <span class="acad-label">ENCADRÉ PAR :</span>
-        <span class="acad-val">Prof. Benbrahime</span>
-      </span>
+    <div class="info-box">
+      <div class="section-lbl">RÉALISÉ PAR :</div>
+      <div class="row-line small-txt">
+        <span class="type-1">ISFAOUI NOUREDDINE</span>
+      </div>
+      <div class="row-line small-txt">
+        <span class="type-2">LAHMAMI MARYEM</span>
+      </div>
+      <div class="row-line small-txt" style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed rgba(148, 163, 184, 0.2);">
+        <span class="type-3"><span class="role-prefix">Encadré Par :</span> Prof Benbrahime</span>
+      </div>
+      <div class="row-line small-txt">
+        <span class="type-4">Master Data Science et Actuariat - FEG SETTAT</span>
+      </div>
     </div>
-    <div class="acad-line">
-      <span class="anim-2">
-        <span class="acad-label">RÉALISÉ PAR :</span>
-        <span class="acad-val">ISFAOUI NOUREDDINE &amp; LAHMAMI MARYEM</span>
-      </span>
-    </div>
-    <div class="acad-line">
-      <span class="anim-3">
-        <span class="acad-label">FILIÈRE &amp; UNIVERSITÉ :</span>
-        <span class="acad-val">Master Data Science et Actuariat — FEG Settat</span>
-      </span>
-    </div>
-  </div>
 
-  <div class="marquee-box">
-    <div class="marquee-text">
-      Projet : <span class="marquee-chip">Credit Scoring - ANN</span> • Prédiction du Risque de Défaut (PD) •
-      <span class="marquee-chip">FEG Settat</span> • Master Data Science et Actuariat
+    <div class="shuttle-track">
+      <div class="shuttle-item">
+        Projet : <span class="shuttle-pill">Credit Scoring - ANN</span>
+      </div>
     </div>
   </div>
 </div>
@@ -569,28 +608,15 @@ def build_executive_report(file_name: str, total_rows: int, high_count: int, hig
         f"Total dossiers : {total_rows}\n"
         f"Risque élevé : {high_count} ({high_pct:.1f}%)\n"
         f"PD moyen : {mean_pd:.4f} | Médiane : {median_pd:.4f}\n"
-        "Encadré par : Prof. Benbrahime\n"
         "Réalisé par : ISFAOUI NOUREDDINE & LAHMAMI MARYEM\n"
-        "Filière & Université : Master Data Science et Actuariat — FEG Settat\n"
+        "Encadré par : Prof Benbrahime\n"
+        "Filière : Master Data Science et Actuariat - FEG SETTAT\n"
     )
 
 
-st.markdown(LIGHT_DASHBOARD_CSS, unsafe_allow_html=True)
-
-with st.sidebar:
-    st.markdown("### Credit Scoring - ANN")
-    st.caption("FEG Settat • Master Data Science et Actuariat")
-    nav_page = st.radio(
-        "التنقل / Navigation",
-        options=[
-            "لوحة القيادة / Tableau de bord",
-            "فحص الملفات والتنبؤ / Prédiction",
-            "معلومات المشروع / À propos",
-        ],
-    )
-    st.markdown("---")
-    st.caption("Réalisé par : ISFAOUI NOUREDDINE & LAHMAMI MARYEM")
-    st.caption("Encadré par : Prof. Benbrahime")
+st.markdown(APP_CSS, unsafe_allow_html=True)
+st.markdown("### Credit Scoring - ANN")
+st.markdown(SHOWCASE_HTML, unsafe_allow_html=True)
 
 try:
     model, preprocessor, threshold = load_artifacts()
@@ -598,39 +624,11 @@ except Exception as e:
     st.error(f"خطأ في تحميل ملفات النموذج / Erreur de chargement : {e}")
     st.stop()
 
-st.markdown("### Credit Scoring - ANN")
-st.caption(f"Prédiction du risque de défaut (PD) • Seuil de référence : **{threshold:.4f}**")
-st.markdown(TOP_BANNER_HTML, unsafe_allow_html=True)
+st.caption(f"العتبة المرجعية / Seuil de référence : **{threshold:.4f}**")
 
-if nav_page == "معلومات المشروع / À propos":
-    st.markdown(
-        """
-        <div class="glass-card">
-          <div class="card-heading">البطاقة الأكاديمية / Fiche Académique</div>
-          <p><strong>Projet :</strong> Credit Scoring - ANN</p>
-          <p><strong>Réalisé par :</strong> ISFAOUI NOUREDDINE &amp; LAHMAMI MARYEM</p>
-          <p><strong>Encadré par :</strong> Prof. Benbrahime</p>
-          <p><strong>Filière :</strong> Master Data Science et Actuariat</p>
-          <p><strong>Établissement :</strong> Faculté d'Économie et de Gestion de Settat (FEG Settat)</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.stop()
-
-st.markdown(
-    """
-    <div class="glass-card">
-      <div class="card-heading">Uploader votre fichier</div>
-      <div class="card-desc">CSV, XLSX, XLS, JSON, TSV, TXT, Parquet, PDF</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
 uploaded_file = st.file_uploader(
-    "اختر ملف البيانات / Choisir un fichier",
+    "ارفع ملف البيانات / Charger un fichier (CSV, XLSX, XLS, JSON, TSV, TXT, Parquet, PDF)",
     type=None,
-    label_visibility="collapsed",
 )
 
 if uploaded_file is not None:
@@ -689,9 +687,8 @@ if uploaded_file is not None:
     health_score = st.session_state["health_score"]
     file_name = st.session_state.get("last_file_name", uploaded_file.name)
 
-    st.success(f"Fichier chargé : {file_name}")
     if missing_cols:
-        st.info(f"مواءمة تلقائية لـ {len(missing_cols)} عمود.")
+        st.info(f"مواءمة تلقائية لـ {len(missing_cols)} عمود غير موجود في الملف.")
 
     total_rows = len(df_out)
     high_count = int((preds == 1).sum())
@@ -705,24 +702,24 @@ if uploaded_file is not None:
         f"""
         <div class="kpi-grid">
           <div class="kpi-card k-blue">
-            <div class="k-title">Enregistrements / الملفات</div>
+            <div class="k-title">إجمالي الملفات / Total dossiers</div>
             <div class="k-num">{total_rows:,}</div>
             <div class="k-sub">Qualité données : {health_score}%</div>
           </div>
-          <div class="kpi-card k-green">
-            <div class="k-title">Clients fiables / مخاطر منخفضة</div>
-            <div class="k-num">{low_pct:.2f}%</div>
-            <div class="k-sub">{low_count} dossiers (&lt; {threshold:.4f})</div>
-          </div>
           <div class="kpi-card k-amber">
-            <div class="k-title">Risque de défaut / مخاطر مرتفعة</div>
-            <div class="k-num">{high_pct:.2f}%</div>
-            <div class="k-sub">{high_count} dossiers (≥ {threshold:.4f})</div>
+            <div class="k-title">مخاطر مرتفعة / Risque élevé</div>
+            <div class="k-num">{high_count} ({high_pct:.1f}%)</div>
+            <div class="k-sub">Probabilité ≥ {threshold:.4f}</div>
+          </div>
+          <div class="kpi-card k-green">
+            <div class="k-title">مخاطر منخفضة / Risque faible</div>
+            <div class="k-num">{low_count} ({low_pct:.1f}%)</div>
+            <div class="k-sub">Probabilité &lt; {threshold:.4f}</div>
           </div>
           <div class="kpi-card k-purple">
-            <div class="k-title">PD moyen / متوسط الاحتمال</div>
+            <div class="k-title">متوسط الاحتمال / PD moyen</div>
             <div class="k-num">{mean_pd:.4f}</div>
-            <div class="k-sub">Seuil : {threshold:.4f}</div>
+            <div class="k-sub">Médiane : {median_pd:.4f}</div>
           </div>
         </div>
         """,
@@ -731,9 +728,9 @@ if uploaded_file is not None:
 
     st.markdown(
         """
-        <div class="glass-card">
-          <div class="card-heading">Aperçu &amp; Distribution PD</div>
-          <div class="card-desc">Répartition des probabilités de défaut (PD)</div>
+        <div class="panel-card">
+          <div class="panel-title">توزيع الاحتمالات وحساسية العتبة / Distribution &amp; Sensibilité</div>
+          <div class="panel-sub">توزيع احتمالات التعثر في المحفظة ومقارنة العتبات</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -745,9 +742,9 @@ if uploaded_file is not None:
 
     st.markdown(
         """
-        <div class="glass-card">
-          <div class="card-heading">Résultat de la Prédiction Individuelle</div>
-          <div class="card-desc">Inspectez un dossier précis et comparez-le à la moyenne</div>
+        <div class="panel-card">
+          <div class="panel-title">فحص ملف فردي / Inspecteur individuel</div>
+          <div class="panel-sub">مقارنة الملف المختار بمتوسط المحفظة وأبرز الفوارق العددية</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -813,13 +810,3 @@ if uploaded_file is not None:
             file_name="credit_scoring_summary.txt",
             mime="text/plain",
         )
-else:
-    st.markdown(
-        """
-        <div class="glass-card">
-          <div class="card-heading">بانتظار رفع ملف البيانات</div>
-          <div class="card-desc">ارفع ملف CSV أو Excel أو أي صيغة أخرى لعرض المؤشرات والتوقعات الفورية.</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
