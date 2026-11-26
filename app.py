@@ -18,18 +18,34 @@ html_block = """<style>
   0%, 100% { opacity: 1; border-color: rgba(56, 189, 248, 0.75); box-shadow: 0 0 22px rgba(56, 189, 248, 0.22); }
   50% { opacity: 0.45; border-color: rgba(148, 163, 184, 0.25); box-shadow: 0 0 4px rgba(56, 189, 248, 0.04); }
 }
+@keyframes typeNameOne {
+  0% { max-width: 0; border-right-color: #38bdf8; }
+  38% { max-width: 100%; border-right-color: #38bdf8; }
+  45%, 100% { max-width: 100%; border-right-color: transparent; }
+}
+@keyframes typeNameTwo {
+  0%, 35% { max-width: 0; opacity: 0; border-right-color: #34d399; }
+  36% { max-width: 0; opacity: 1; border-right-color: #34d399; }
+  75% { max-width: 100%; opacity: 1; border-right-color: #34d399; }
+  82%, 100% { max-width: 100%; opacity: 1; border-right-color: transparent; }
+}
 @keyframes seqAr {
-  0%, 30% { opacity: 1; }
-  34%, 100% { opacity: 0; }
+  0%, 22% { opacity: 1; }
+  25%, 100% { opacity: 0; }
 }
 @keyframes seqFr {
-  0%, 33% { opacity: 0; }
-  37%, 63% { opacity: 1; }
-  67%, 100% { opacity: 0; }
+  0%, 24% { opacity: 0; }
+  27%, 47% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 @keyframes seqEn {
-  0%, 66% { opacity: 0; }
-  70%, 96% { opacity: 1; }
+  0%, 49% { opacity: 0; }
+  52%, 72% { opacity: 1; }
+  75%, 100% { opacity: 0; }
+}
+@keyframes seqAmz {
+  0%, 74% { opacity: 0; }
+  77%, 97% { opacity: 1; }
   100% { opacity: 0; }
 }
 @keyframes alreadyGlidingRightToLeft {
@@ -66,16 +82,28 @@ html_block = """<style>
 .dot-amber { background: #fbbf24; color: #fbbf24; animation-delay: 0.6s; }
 .dot-violet { background: #c084fc; color: #c084fc; animation-delay: 0.9s; }
 .live-chip { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; color: #a7f3d0; background: rgba(16,185,129,0.14); border: 1px solid rgba(52,211,153,0.35); padding: 2px 9px; border-radius: 999px; margin-left: 6px; }
-.greeting-box { position: relative; min-width: 130px; height: 30px; display: flex; align-items: center; justify-content: flex-end; }
-.greeting-word { position: absolute; right: 0; font-weight: 800; font-size: 16px; padding: 2px 12px; border-radius: 999px; white-space: nowrap; opacity: 0; }
-.word-ar { font-family: "Cairo", sans-serif; color: #7dd3fc; background: rgba(14,165,233,0.18); border: 1px solid rgba(125,211,252,0.3); animation: seqAr 5.4s infinite ease-in-out; }
-.word-fr { color: #6ee7b7; background: rgba(16,185,129,0.18); border: 1px solid rgba(110,231,183,0.3); animation: seqFr 5.4s infinite ease-in-out; }
-.word-en { color: #fde68a; background: rgba(245,158,11,0.18); border: 1px solid rgba(253,230,138,0.3); animation: seqEn 5.4s infinite ease-in-out; }
+.greeting-box { position: relative; min-width: 155px; height: 30px; display: flex; align-items: center; justify-content: flex-end; }
+.greeting-word { position: absolute; right: 0; font-weight: 800; font-size: 15.5px; padding: 2px 12px; border-radius: 999px; white-space: nowrap; opacity: 0; }
+.word-ar { font-family: "Cairo", sans-serif; color: #7dd3fc; background: rgba(14,165,233,0.18); border: 1px solid rgba(125,211,252,0.3); animation: seqAr 7.2s infinite ease-in-out; }
+.word-fr { color: #6ee7b7; background: rgba(16,185,129,0.18); border: 1px solid rgba(110,231,183,0.3); animation: seqFr 7.2s infinite ease-in-out; }
+.word-en { color: #fde68a; background: rgba(245,158,11,0.18); border: 1px solid rgba(253,230,138,0.3); animation: seqEn 7.2s infinite ease-in-out; }
+.word-amz { color: #e9d5ff; background: rgba(168,85,247,0.2); border: 1px solid rgba(216,180,254,0.35); animation: seqAmz 7.2s infinite ease-in-out; }
 .info-split-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 14px; }
 .french-statement-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(148,163,184,0.18); border-radius: 14px; padding: 14px 16px; font-size: 14.5px; line-height: 1.7; color: #e2e8f0; }
 .fixed-credits-box { background: rgba(15,23,42,0.82); border: 1px solid rgba(56,189,248,0.5); border-radius: 14px; padding: 14px 16px; animation: authorPulse 2.4s infinite ease-in-out; }
 .realise-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #7dd3fc; margin-bottom: 6px; }
-.student-line { font-size: 15px; font-weight: 800; color: #f8fafc; letter-spacing: 0.4px; margin-bottom: 4px; }
+.student-typewriter-1 {
+  display: inline-block; overflow: hidden; white-space: nowrap;
+  max-width: 100%; border-right: 2px solid transparent; padding-right: 4px;
+  font-size: 15px; font-weight: 800; color: #f8fafc; letter-spacing: 0.4px; margin-bottom: 4px;
+  animation: typeNameOne 7s steps(20, end) infinite;
+}
+.student-typewriter-2 {
+  display: inline-block; overflow: hidden; white-space: nowrap;
+  max-width: 100%; border-right: 2px solid transparent; padding-right: 4px;
+  font-size: 15px; font-weight: 800; color: #f8fafc; letter-spacing: 0.4px; margin-bottom: 4px;
+  animation: typeNameTwo 7s steps(16, end) infinite;
+}
 .supervisor-line { font-size: 13.5px; font-weight: 700; color: #fde68a; margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(148,163,184,0.22); }
 .project-slow-track-wrap { width: 100%; overflow: hidden; background: rgba(255,255,255,0.04); border: 1px solid rgba(148,163,184,0.2); border-radius: 12px; padding: 9px 0 6px 0; }
 .project-slow-mover { display: inline-block; white-space: nowrap; font-size: 17px; font-weight: 800; color: #7dd3fc; animation: alreadyGlidingRightToLeft 20s linear infinite; }
@@ -83,7 +111,7 @@ html_block = """<style>
 .project-pill { background: linear-gradient(90deg, rgba(56,189,248,0.24), rgba(16,185,129,0.24)); border: 1px solid rgba(125,211,252,0.4); color: #ffffff; padding: 2px 13px; border-radius: 999px; margin: 0 6px; }
 .scan-line { height: 2px; width: 100%; margin-top: 8px; border-radius: 999px; background: linear-gradient(90deg, transparent, #38bdf8, #34d399, #fbbf24, transparent); animation: pulseBar 3s ease-in-out infinite; }
 </style>
-<div class="global-showcase-card"><div class="global-showcase-inner"><div class="top-header-strip"><div class="led-cluster"><span class="led-dot dot-sky"></span><span class="led-dot dot-emerald"></span><span class="led-dot dot-amber"></span><span class="led-dot dot-violet"></span><span class="live-chip">ANN • LIVE</span></div><div class="greeting-box"><span class="greeting-word word-ar">مرحباً</span><span class="greeting-word word-fr">Bonjour</span><span class="greeting-word word-en">Welcome</span></div></div><div class="info-split-grid"><div class="french-statement-box">Ce projet a été développé par nos soins dans le cadre du parcours <strong>Master Data Science et Actuariat</strong>, sous l'encadrement académique de <strong>Prof Benbrahime</strong>.</div><div class="fixed-credits-box"><div class="realise-label">Réalisé Par :</div><div class="student-line">ISFAOUI NOUREDDINE</div><div class="student-line">LAHMAMI MARYEM</div><div class="supervisor-line">Encadré Par : Prof Benbrahime</div></div></div><div class="project-slow-track-wrap"><div class="project-slow-mover">Projet : <span class="project-pill">Credit Scoring - ANN</span> • Analyse &amp; Prédiction du Risque de Crédit • <span class="project-pill">Credit Scoring - ANN</span> • Modèle Réseau de Neurones</div><div class="scan-line"></div></div></div></div>"""
+<div class="global-showcase-card"><div class="global-showcase-inner"><div class="top-header-strip"><div class="led-cluster"><span class="led-dot dot-sky"></span><span class="led-dot dot-emerald"></span><span class="led-dot dot-amber"></span><span class="led-dot dot-violet"></span><span class="live-chip">ANN • LIVE</span></div><div class="greeting-box"><span class="greeting-word word-ar">مرحباً</span><span class="greeting-word word-fr">Bonjour</span><span class="greeting-word word-en">Welcome</span><span class="greeting-word word-amz">ⴰⵣⵓⵍ / Azul</span></div></div><div class="info-split-grid"><div class="french-statement-box">Ce projet a été développé par nos soins dans le cadre du parcours <strong>Master Data Science et Actuariat</strong>, sous l'encadrement académique de <strong>Prof Benbrahime</strong>.</div><div class="fixed-credits-box"><div class="realise-label">Réalisé Par :</div><div><span class="student-typewriter-1">ISFAOUI NOUREDDINE</span></div><div><span class="student-typewriter-2">LAHMAMI MARYEM</span></div><div class="supervisor-line">Encadré Par : Prof Benbrahime</div></div></div><div class="project-slow-track-wrap"><div class="project-slow-mover">Projet : <span class="project-pill">Credit Scoring - ANN</span> • Analyse &amp; Prédiction du Risque de Crédit • <span class="project-pill">Credit Scoring - ANN</span> • Modèle Réseau de Neurones</div><div class="scan-line"></div></div></div></div>"""
 
 st.markdown(html_block, unsafe_allow_html=True)
 
@@ -148,13 +176,33 @@ def load_uploaded_dataframe(file_obj):
         return read_pdf_tables(file_obj)
     raise ValueError("صيغة الملف غير مدعومة / Format de fichier non supporté.")
 
+def classify_risk_tier(prob, active_threshold):
+    margin = 0.08
+    if prob >= active_threshold:
+        return "مرتفع / Élevé"
+    if prob >= max(0.0, active_threshold - margin):
+        return "متوسط / Modéré"
+    return "منخفض / Faible"
+
 try:
-    model, preprocessor, threshold = load_artifacts()
+    model, preprocessor, base_threshold = load_artifacts()
 except Exception as e:
     st.error(f"خطأ في تحميل ملفات النموذج / Erreur de chargement : {e}")
     st.stop()
 
-st.caption(f"العتبة المعتمدة / Seuil de décision (threshold) : **{threshold:.4f}**")
+col_t1, col_t2 = st.columns([2, 1])
+with col_t1:
+    active_threshold = st.slider(
+        "محاكاة عتبة القرار / Simulation du seuil (Threshold)",
+        min_value=0.05,
+        max_value=0.95,
+        value=float(np.clip(base_threshold, 0.05, 0.95)),
+        step=0.01
+    )
+with col_t2:
+    st.caption(f"العتبة الأصلية في النموذج / Seuil de référence : **{base_threshold:.4f}**")
+    if abs(active_threshold - base_threshold) > 1e-6:
+        st.caption("وضع المحاكاة نشط / Mode simulation actif")
 
 uploaded_file = st.file_uploader(
     "ارفع ملف للتجربة / Charger un fichier (CSV, XLSX, XLS, JSON, TSV, TXT, Parquet, PDF)",
@@ -172,6 +220,10 @@ if uploaded_file is not None:
         st.warning("الملف فارغ / Le fichier est vide.")
         st.stop()
 
+    missing_cells = int(df.isna().sum().sum())
+    if missing_cells > 0:
+        st.info(f"ملاحظة جودة البيانات / Qualité des données : تم رصد {missing_cells} قيمة فارغة وسيتم معالجتها عبر خط التحضير.")
+
     try:
         X_proc = preprocessor.transform(df)
         probs = model.predict(X_proc, verbose=0).reshape(-1)
@@ -179,11 +231,13 @@ if uploaded_file is not None:
         st.error(f"خطأ أثناء تجهيز البيانات أو التنبؤ / Erreur lors de la prédiction : {e}")
         st.stop()
 
-    preds = (probs >= threshold).astype(int)
+    preds = (probs >= active_threshold).astype(int)
+    tiers = [classify_risk_tier(float(p), active_threshold) for p in probs]
 
     df_out = df.copy()
     df_out["probability"] = np.round(probs, 6)
     df_out["prediction"] = preds
+    df_out["درجة الخطورة / Niveau de risque"] = tiers
     df_out["النتيجة / Résultat"] = np.where(
         preds == 1,
         "تعثر محتمل / Risque élevé (Défaut)",
@@ -195,12 +249,40 @@ if uploaded_file is not None:
     low_risk_count = int((preds == 0).sum())
     high_risk_pct = (high_risk_count / total_rows) * 100 if total_rows else 0.0
     low_risk_pct = (low_risk_count / total_rows) * 100 if total_rows else 0.0
+    mean_pd = float(np.mean(probs))
+    median_pd = float(np.median(probs))
 
-    st.subheader("ملخص التوقعات / Résumé des prédictions")
-    c1, c2, c3 = st.columns(3)
-    c1.metric("إجمالي الملفات / Total dossiers", total_rows)
-    c2.metric("مخاطر مرتفعة / Risque élevé", f"{high_risk_count} ({high_risk_pct:.1f}%)")
-    c3.metric("مخاطر منخفضة / Risque faible", f"{low_risk_count} ({low_risk_pct:.1f}%)")
+    st.subheader("ملخص المحفظة والتوقعات / Résumé du portefeuille")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("إجمالي الملفات / Total dossiers", total_rows)
+    m2.metric("مخاطر مرتفعة / Risque élevé", f"{high_risk_count} ({high_risk_pct:.1f}%)")
+    m3.metric("مخاطر منخفضة / Risque faible", f"{low_risk_count} ({low_risk_pct:.1f}%)")
+    m4.metric("متوسط الاحتمال / PD moyen", f"{mean_pd:.4f}", delta=f"Médiane: {median_pd:.4f}")
+
+    if high_risk_pct >= 40.0:
+        st.warning(f"تنبيه المحفظة / Alerte portefeuille : نسبة الحالات ذات الخطورة المرتفعة مرتفعة ({high_risk_pct:.1f}%).")
+
+    st.subheader("فحص ملف فردي / Inspecteur individuel")
+    selected_idx = st.selectbox(
+        "اختر رقم السطر / Sélectionner une ligne (Index)",
+        options=df_out.index.tolist()
+    )
+    row_item = df_out.loc[selected_idx]
+    item_prob = float(row_item["probability"])
+    item_pred = int(row_item["prediction"])
+    item_tier = row_item["درجة الخطورة / Niveau de risque"]
+
+    b1, b2, b3 = st.columns(3)
+    b1.metric("احتمال التعثر / Probabilité", f"{item_prob:.4f}")
+    b2.metric("درجة الخطورة / Niveau", item_tier)
+    b3.metric("القرار / Décision", row_item["النتيجة / Résultat"])
+
+    if item_pred == 1:
+        st.error("توصية إجرائية / Recommandation : يُنصح بمراجعة إضافية أو طلب ضمانات قبل الاعتماد / Revue approfondie recommandée.")
+    elif "متوسط" in item_tier:
+        st.warning("توصية إجرائية / Recommandation : الحالة قريبة من العتبة، يُستحسن تدقيق الملف يدوياً / Zone proche du seuil, vérification conseillée.")
+    else:
+        st.success("توصية إجرائية / Recommandation : مؤشر السداد إيجابي ضمن العتبة المعتمدة / Profil favorable sous le seuil défini.")
 
     filter_choice = st.radio(
         "تصفية النتائج / Filtrer les résultats :",
