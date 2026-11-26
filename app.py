@@ -86,7 +86,7 @@ APP_CSS = """<style>
 
 @keyframes goAndBack {
   0% { transform: translateX(0%); }
-  50% { transform: translateX(28%); }
+  50% { transform: translateX(20%); }
   100% { transform: translateX(0%); }
 }
 
@@ -135,7 +135,7 @@ APP_CSS = """<style>
 
 .greet-box {
   position: relative;
-  min-width: 110px;
+  min-width: 120px;
   height: 30px;
   display: flex;
   align-items: center;
@@ -151,6 +151,8 @@ APP_CSS = """<style>
   border-radius: 999px;
   white-space: nowrap;
   opacity: 0;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 .gt-ar { font-family: "Cairo", sans-serif; color: #7dd3fc; background: rgba(56, 189, 248, 0.18); border: 1px solid rgba(125, 211, 252, 0.35); animation: greetAr 10s infinite ease-in-out; }
 .gt-amz { color: #e9d5ff; background: rgba(192, 132, 252, 0.18); border: 1px solid rgba(216, 180, 254, 0.35); animation: greetAmz 10s infinite ease-in-out; }
@@ -252,7 +254,7 @@ APP_CSS = """<style>
 
 .shuttle-item {
   display: inline-block;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 800;
   color: #e2e8f0;
   animation: goAndBack 5.5s ease-in-out infinite;
@@ -262,9 +264,40 @@ APP_CSS = """<style>
   background: rgba(56, 189, 248, 0.22);
   border: 1px solid rgba(125, 211, 252, 0.42);
   color: #ffffff;
-  padding: 1px 9px;
+  padding: 1px 8px;
   border-radius: 999px;
-  margin: 0 4px;
+  margin: 0 3px;
+}
+
+.shuttle-fr {
+  background: rgba(52, 211, 153, 0.2);
+  border: 1px solid rgba(110, 231, 183, 0.42);
+  color: #a7f3d0;
+  padding: 1px 8px;
+  border-radius: 999px;
+  margin: 0 3px;
+}
+
+[data-testid="stFileUploader"] section {
+  background: linear-gradient(155deg, #101d36 0%, #0b1426 100%) !important;
+  border: 1.5px dashed rgba(56, 189, 248, 0.65) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.16) !important;
+}
+
+[data-testid="stFileUploader"] section span,
+[data-testid="stFileUploader"] section small,
+[data-testid="stFileUploader"] section div {
+  color: #e2e8f0 !important;
+}
+
+[data-testid="stFileUploader"] section button {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #38bdf8 !important;
+  border-radius: 10px !important;
+  font-weight: 700 !important;
 }
 
 .kpi-grid {
@@ -326,7 +359,10 @@ SHOWCASE_HTML = (
     '<div class="row-line small-txt"><span class="type-4">Master Data Science et Actuariat - FEG SETTAT</span></div>'
     '</div>'
     '<div class="shuttle-track">'
-    '<div class="shuttle-item">Projet : <span class="shuttle-pill">Credit Scoring - ANN</span></div>'
+    '<div class="shuttle-item">'
+    'Projet : <span class="shuttle-pill">Credit Scoring - ANN</span>'
+    '<span class="shuttle-fr">Prédiction du remboursement des crédits</span>'
+    '</div>'
     '</div>'
     '</div>'
     '</div>'
