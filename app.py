@@ -196,4 +196,259 @@ def read_pdf_tables(raw_bytes):
         raise ImportError("مكتبة pdfplumber غير مثبّتة لقراءة جداول PDF.") from exc
 
     tables_dfs = []
-    with pdfplumber.
+    with pdfplumber.open(io.BytesIO(raw_bytes)) as pdf:
+        for page in pdf.pages:
+            extracted = page.extract_tables() or []
+            for table in extracted:
+                if len(table) > 1:
+                    headers = [str(h).strip() if h else f"col_{i}" for i, h in enumerate(table[0])]
+                    rows = table[1:]
+                    tables_dfs.append(pd.DataFrame(rows, columns=headers))
+
+    if not tables_dfs:
+        raise ValueError("لم يتم العثور على جدول منظم داخل ملف PDF / Aucun tableau structuré trouvé dans le PDF.")
+    return pd.concat(tables_dfs, ignore_index=True)
+
+def load_any_tabular_file(file_obj):
+    raw_bytes = file_obj.getvalue()
+    name = file_obj.name.lower()
+
+    if name.endswith((".xlsx", ".xls", ".xlsm", ".xlsb", ".ods")):
+        loaders = [read_excel_smart, read_delimited_smart]
+    elif name.endswith((".csv", ".tsv", ".txt", ".data")):
+        loaders = [read_delimited_smart, read_excel_smart]
+    elif name.endswith(".json"):
+        def _json_loader(b):
+            raw_text = b.decode("utf-8-sig", errors="replace")
+            data = json.loads(raw_text)
+            return pd.json_normalize(data) if isinstance(data, (list, dict)) else pd.read_json(io.StringIO(raw_text))
+        loaders = [_json_loader, read_delimited_smart]
+    elif name.endswith(".parquet"):
+        loaders = [lambda b: pd.read_parquet(io.BytesIO(b)), read_delimited_smart]
+    elif name.endswith(".pdf"):
+        loaders = [read_pdf_tables]
+    else:
+        loaders = [read_excel_smart, read_delimited_smart, read_pdf_tables]
+
+    last_err = None
+    for loader in loaders:
+        try:
+            df = loader(raw_bytes)
+            if df is not None and not df.empty:
+                return df
+        except Exception as exc:
+            last_err = exc
+            continue
+    raise ValueError(f"تعذر قراءة الملف بأي صيغة مدعومة ({last_err}).")
+
+def align_dataframe_to_preprocessor(df_raw, preprocessor):
+    expected_cols = getattr(preprocessor, "feature_names_in_", None)
+    df = _promote_header_if_needed(df_raw.copy(), expected_cols=expected_cols)
+    df.columns = [str(c).strip() for c in df.columns]
+    df = df.loc[:, ~df.columns.duplicated()]
+
+    for col in df.select_dtypes(include=["object", "string"]).columns:
+        cleaned = df[col].astype(str).str.strip().str.replace(" ", "", regex=False).str.replace(",", ".", regex=False)
+        numeric_try = pd.to_numeric(cleaned, errors="coerce")
+        if len(df) > 0 and numeric_try.notna().sum() >= max(1, int(0.7 * len(df))):
+            df[col] = numeric_try
+
+    if expected_cols is None:
+        return df, []
+
+    expected_cols = list(expected_cols)
+    exact_map = {str(c).strip(): c for c in df.columns}
+    norm_map = {_norm_key(c): c for c in df.columns if _norm_key(c)}
+
+    aligned = pd.DataFrame(index=df.index)
+    missing_cols = []
+    for exp in expected_cols:
+        exp_str = str(exp).strip()
+        exp_norm = _norm_key(exp_str)
+        if exp_str in exact_map:
+            aligned[exp] = df[exact_map[exp_str]]
+        elif exp_norm and exp_norm in norm_map:
+            aligned[exp] = df[norm_map[exp_norm]]
+        else:
+            aligned[exp] = np.nan
+            missing_cols.append(exp)
+
+    return aligned, missing_cols
+
+def safe_predict_probabilities(model, preprocessor, df_model_input):
+    try:
+        X_proc = preprocessor.transform(df_model_input)
+        return model.predict(X_proc, verbose=0).reshape(-1)
+    except Exception:
+        df_retry = df_model_input.copy()
+        for col in df_retry.columns:
+            if df_retry[col].dtype == object or str(df_retry[col].dtype).startswith("string"):
+                num_try = pd.to_numeric(
+                    df_retry[col].astype(str).str.strip().str.replace(",", ".", regex=False),
+                    errors="coerce"
+                )
+                if num_try.notna().sum() > 0:
+                    df_retry[col] = num_try
+        X_proc = preprocessor.transform(df_retry)
+        return model.predict(X_proc, verbose=0).reshape(-1)
+
+try:
+    model, preprocessor, threshold = load_artifacts()
+except Exception as e:
+    st.error(f"خطأ في تحميل ملفات النموذج / Erreur de chargement : {e}")
+    st.stop()
+
+st.caption(f"العتبة الأصلية في النموذج / Seuil de référence : **{threshold:.4f}**")
+
+uploaded_file = st.file_uploader(
+    "ارفع أي ملف بيانات للتجربة / Charger un fichier (CSV, XLSX, XLS, JSON, TSV, TXT, Parquet, PDF...)",
+    type=None
+)
+
+if uploaded_file is not None:
+    try:
+        df_original = load_any_tabular_file(uploaded_file)
+    except Exception as e:
+        st.error(f"تعذر قراءة الملف المرفوع / Erreur de lecture : {e}")
+        st.stop()
+
+    df_original = df_original.dropna(how="all").reset_index(drop=True)
+    if df_original.empty:
+        st.warning("الملف فارغ أو لا يحتوي على صفوف صالحة / Le fichier est vide.")
+        st.stop()
+
+    df_model_input, missing_cols = align_dataframe_to_preprocessor(df_original, preprocessor)
+
+    if missing_cols:
+        st.info(
+            f"مواءمة تلقائية للأعمدة / Alignement automatique : تم تعويض الأعمدة غير الموجودة في الملف بقيم افتراضية ({len(missing_cols)} عمود)."
+        )
+
+    try:
+        probs = safe_predict_probabilities(model, preprocessor, df_model_input)
+    except Exception as e:
+        st.error(f"تعذر إتمام التنبؤ على هذا الملف / Erreur lors de la prédiction : {e}")
+        st.stop()
+
+    preds = (probs >= threshold).astype(int)
+
+    df_out = df_original.copy()
+    df_out["probability"] = np.round(probs, 6)
+    df_out["prediction"] = preds
+    df_out["النتيجة / Résultat"] = np.where(
+        preds == 1,
+        "تعثر محتمل / Risque élevé (Défaut)",
+        "سداد محتمل / Risque faible (Bon client)"
+    )
+
+    total_rows = len(df_out)
+    high_risk_count = int((preds == 1).sum())
+    low_risk_count = int((preds == 0).sum())
+    high_risk_pct = (high_risk_count / total_rows) * 100 if total_rows else 0.0
+    low_risk_pct = (low_risk_count / total_rows) * 100 if total_rows else 0.0
+    mean_pd = float(np.mean(probs))
+    median_pd = float(np.median(probs))
+
+    st.markdown(
+        """
+        <div class="section-banner">
+          <div class="section-banner-title">ملخص المحفظة والتوقعات / Résumé du portefeuille</div>
+          <div class="section-banner-sub">Indicateurs clés de risque et répartition des dossiers analysés</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"""
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-total">
+            <div class="kpi-label">إجمالي الملفات / Total dossiers</div>
+            <div class="kpi-value">{total_rows}</div>
+            <div class="kpi-meta">Dossiers évalués par ANN</div>
+          </div>
+          <div class="kpi-card kpi-high">
+            <div class="kpi-label">مخاطر مرتفعة / Risque élevé</div>
+            <div class="kpi-value">{high_risk_count} ({high_risk_pct:.1f}%)</div>
+            <div class="kpi-meta">Probabilité ≥ {threshold:.4f}</div>
+          </div>
+          <div class="kpi-card kpi-low">
+            <div class="kpi-label">مخاطر منخفضة / Risque faible</div>
+            <div class="kpi-value">{low_risk_count} ({low_risk_pct:.1f}%)</div>
+            <div class="kpi-meta">Probabilité &lt; {threshold:.4f}</div>
+          </div>
+          <div class="kpi-card kpi-pd">
+            <div class="kpi-label">متوسط الاحتمال / PD moyen</div>
+            <div class="kpi-value">{mean_pd:.4f}</div>
+            <div class="kpi-meta">Médiane : {median_pd:.4f}</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if high_risk_pct >= 40.0:
+        st.warning(f"تنبيه المحفظة / Alerte portefeuille : نسبة الحالات ذات الخطورة المرتفعة مرتفعة ({high_risk_pct:.1f}%).")
+
+    st.markdown(
+        """
+        <div class="section-banner" style="border-left-color: #34d399;">
+          <div class="section-banner-title">فحص ملف فردي / Inspecteur individuel</div>
+          <div class="section-banner-sub">Sélectionnez un index pour inspecter la probabilité et la décision</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    selected_idx = st.selectbox(
+        "اختر رقم السطر / Sélectionner une ligne (Index)",
+        options=df_out.index.tolist()
+    )
+    row_item = df_out.loc[selected_idx]
+    item_prob = float(row_item["probability"])
+    item_pred = int(row_item["prediction"])
+
+    i1, i2 = st.columns(2)
+    i1.metric("احتمال التعثر / Probabilité", f"{item_prob:.4f}")
+    i2.metric("النتيجة / Résultat", row_item["النتيجة / Résultat"])
+
+    if item_pred == 1:
+        st.error("توصية إجرائية / Recommandation : يُنصح بمراجعة إضافية أو طلب ضمانات قبل الاعتماد / Revue approfondie recommandée.")
+    else:
+        st.success("توصية إجرائية / Recommandation : مؤشر السداد إيجابي ضمن العتبة المعتمدة / Profil favorable sous le seuil défini.")
+
+    filter_choice = st.radio(
+        "تصفية النتائج / Filtrer les résultats :",
+        options=[
+            "الكل / Tous",
+            "مخاطر مرتفعة فقط / Risque élevé",
+            "مخاطر منخفضة فقط / Risque faible"
+        ],
+        horizontal=True
+    )
+
+    if filter_choice == "مخاطر مرتفعة فقط / Risque élevé":
+        filtered_df = df_out[df_out["prediction"] == 1]
+    elif filter_choice == "مخاطر منخفضة فقط / Risque faible":
+        filtered_df = df_out[df_out["prediction"] == 0]
+    else:
+        filtered_df = df_out
+
+    st.markdown(
+        """
+        <div class="section-banner" style="border-left-color: #fbbf24;">
+          <div class="section-banner-title">جدول النتائج / Tableau des résultats</div>
+          <div class="section-banner-sub">Consultation détaillée et exportation CSV</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.dataframe(filtered_df, use_container_width=True)
+
+    csv_bytes = filtered_df.to_csv(index=False).encode("utf-8-sig")
+    st.download_button(
+        label="تحميل النتائج بصيغة CSV / Télécharger les résultats (CSV)",
+        data=csv_bytes,
+        file_name="credit_scoring_predictions.csv",
+        mime="text/csv"
+    )
