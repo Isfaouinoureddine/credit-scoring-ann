@@ -60,7 +60,8 @@ BANNER = (
 def load_artifacts():
     model = load_model("ann_model.keras")
     preprocessor = joblib.load("preprocessor.pkl")
-    threshold = float(json.load(open("threshold.json", encoding="utf-8"))["threshold"])
+    with open("threshold.json", encoding="utf-8") as f:
+        threshold = float(json.load(f)["threshold"])
     return model, preprocessor, threshold
 
 
@@ -80,7 +81,7 @@ def read_file(f):
     for sep in (",", ";", "\t", "|"):
         try:
             df = pd.read_csv(io.BytesIO(b), sep=sep, on_bad_lines="skip")
-            if df.shape[1] > 1 or sep == "|":
+            if df is not None and not df.empty and (df.shape[1] > 1 or sep == "|"):
                 return df
         except Exception:
             pass
@@ -90,6 +91,10 @@ def read_file(f):
 def align_df(df, preprocessor):
     df = df.copy()
     df.columns = [str(c).strip() for c in df.columns]
+    for col in df.select_dtypes(include=["object", "string"]).columns:
+        num_try = pd.to_numeric(df[col].astype(str).str.strip().str.replace(" ", "", regex=False).str.replace(",", ".", regex=False), errors="coerce")
+        if len(df) > 0 and num_try.notna().sum() >= max(1, int(0.7 * len(df))):
+            df[col] = num_try
     cols = getattr(preprocessor, "feature_names_in_", None)
     if cols is None:
         return df, []
@@ -109,15 +114,27 @@ st.markdown(CSS, unsafe_allow_html=True)
 st.markdown("### Credit Scoring - ANN")
 st.markdown(BANNER, unsafe_allow_html=True)
 
-model, preprocessor, threshold = load_artifacts()
+try:
+    model, preprocessor, threshold = load_artifacts()
+except Exception as e:
+    st.error(f"خطأ في تحميل النموذج / Erreur : {e}")
+    st.stop()
+
 st.caption(f"العتبة المرجعية / Seuil de référence : **{threshold:.4f}**")
 
-up = st.file_uploader("ارفع ملف البيانات / Charger un fichier (CSV, XLSX, JSON, Parquet, PDF)", type=None)
+up = st.file_uploader("ارفع ملف البيانات / Charger un fichier (CSV, XLSX, JSON, Parquet, PDF)", type=None, key="uploader_main")
 if up is not None:
-    df_orig = read_file(up).dropna(how="all").reset_index(drop=True)
-    X_in, missing = align_df(df_orig, preprocessor)
-    probs = model.predict(preprocessor.transform(X_in), verbose=0).reshape(-1)
-    preds = (probs >= threshold).astype(int)
+    try:
+        df_orig = read_file(up).dropna(how="all").reset_index(drop=True)
+        if df_orig.empty:
+            st.warning("الملف فارغ / Le fichier est vide.")
+            st.stop()
+        X_in, missing = align_df(df_orig, preprocessor)
+        probs = model.predict(preprocessor.transform(X_in), verbose=0).reshape(-1)
+        preds = (probs >= threshold).astype(int)
+    except Exception as e:
+        st.error(f"تعذر معالجة الملف / Erreur : {e}")
+        st.stop()
 
     df_out = df_orig.copy()
     df_out["probability"] = np.round(probs, 6)
